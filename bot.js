@@ -1,4 +1,4 @@
-boardArray/*
+/*
   Discord Plays Minesweeper Bot
 */
 const fs = require('fs');
@@ -340,4 +340,4 @@ function rowA1ToIndex( rowA1, index ) {
 function main(token) {
   client.login(token);
 }
-module.exports{start:main};
+module.exports={start:main};
