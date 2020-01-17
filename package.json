@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/mrmelon54/discord-plays-minesweeper/issues"
   },
-  "homepage": "https://github.com/mrmelon54/discord-plays-minesweeper#readme"
+  "homepage": "https://github.com/mrmelon54/discord-plays-minesweeper#readme",
+  "dependencies": {
+    "discord.js": "^11.5.1"
+  }
 }
