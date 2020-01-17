@@ -2,9 +2,9 @@
   "name": "discord-plays-minesweeper",
   "version": "1.0.0",
   "description": "",
-  "main": "startup.js",
+  "main": "bot.js",
   "scripts": {
-    "start": "node startup.js"
+    "start": "node bot.js"
   },
   "repository": {
     "type": "git",
