@@ -27,17 +27,20 @@ function processCommand(receivedMessage) {
   let splitCommand = fullCommand.split(" "); // Split the message up in to pieces for each space
   let primaryCommand = splitCommand[0]; // The first word directly after the exclamation is the command
   let arguments = splitCommand.slice(1); // All other words are arguments/parameters/options for the command
-
-  if (primaryCommand == "help") {
-    helpCommand(receivedMessage, arguments);
-  } else if (primaryCommand == "start") {
-    startCommand(receivedMessage, arguments);
-  } else if (primaryCommand == "flag") {
-    flagCommand(receivedMessage, arguments);
-  } else if (primaryCommand == "dig") {
-    digCommand(receivedMessage, arguments);
-  } else {
-    receivedMessage.channel.send("Unknown command. Use >help for help.");
+  try {
+    if (primaryCommand == "help") {
+      helpCommand(receivedMessage, arguments);
+    } else if (primaryCommand == "start") {
+      startCommand(receivedMessage, arguments);
+    } else if (primaryCommand == "flag") {
+      flagCommand(receivedMessage, arguments);
+    } else if (primaryCommand == "dig") {
+      digCommand(receivedMessage, arguments);
+    } else {
+      receivedMessage.channel.send("Unknown command. Use >help for help.");
+    }
+  } catch(err) {
+    receivedMessage.channel.send(err)
   }
 
   /* else if (primaryCommand == "ruleset") {
