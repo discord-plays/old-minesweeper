@@ -337,5 +337,4 @@ function rowA1ToIndex( rowA1, index ) {
   return rowA1 - 1 + index;
 }
 // login stuffs
-var token=require('./token.json').token;
-client.login(token);
+client.login(tokenfile.token);
