@@ -52,10 +52,12 @@ function processCommand(receivedMessage) {
     }
     */
 
-    receivedMessage.channel.send(new Discord.RichEmbed()
-      .setColor('#ff0000')
-      .setAuthor('Uh Oh...')
-      .setTitle(err));
+    receivedMessage.channel.send(
+      new Discord.RichEmbed()
+        .setColor("#ff0000")
+        .setAuthor("Uh Oh...")
+        .setTitle(err)
+    );
   }
 }
 function helpCommand(msg, args) {
@@ -160,7 +162,7 @@ function startCommand(msg, args) {
 
   fillNumbers(guildId, channelId);
 
-  displayBoard(guildId, channelId,exploded=false,won=true);
+  displayBoard(guildId, channelId, (exploded = false), (won = true));
 }
 function flagCommand(msg, args) {
   // coord is type string, such as 'A1' or 'G6' | flagType is type string, only 'S', 'D', 'T' or 'A' (case-insensitive)
@@ -203,7 +205,7 @@ function flagCommand(msg, args) {
     }
   }
 
-  displayBoard(guildId, channelId,exploded=false,won=true);
+  displayBoard(guildId, channelId, (exploded = false), (won = true));
 }
 
 function digCommand(msg, args) {
@@ -252,21 +254,21 @@ function digCommand(msg, args) {
     }
   }
   if (totalNonMines == totalUncovered) {
-    gameWin(guildId, channelId);
+    return gameWin(guildId, channelId);
   }
 
-  displayBoard(guildId, channelId,exploded=false,won=true);
+  displayBoard(guildId, channelId);
 }
 
 function bombExplode(guildId, channelId) {
-  displayBoard(guildId, channelId,exploded=true);
+  displayBoard(guildId, channelId, (exploded = true));
   delete boardArray[guildId][channelId];
   // throw new Error("Failed: bomb exploded");
 }
 
 function gameWin(guildId, channelId) {
-  displayBoard(guildId, channelId, exploded=false, won=true);
-  delete boardArray[guildId, channelId];
+  displayBoard(guildId, channelId, (won = true));
+  delete boardArray[guildId][channelId];
 }
 
 function fillNumbers(guildId, channelId) {
@@ -300,10 +302,10 @@ function findMines(guildId, channelId, x, y) {
         c++;
         break;
       case 2:
-        c+=2;
+        c += 2;
         break;
       case 3:
-        c+=3;
+        c += 3;
         break;
     }
   }
@@ -313,7 +315,7 @@ function findMines(guildId, channelId, x, y) {
 function floodFill(guildId, channelId, posX, posY) {
   var toCheck = [[posX, posY]];
   var i = -1;
-  while (i < (toCheck.length-1)) {
+  while (i < toCheck.length - 1) {
     i++;
     if (toCheck[i][0] < 0 || toCheck[i][0] >= boardArray[guildId][channelId][255][0]) continue;
     if (toCheck[i][1] < 0 || toCheck[i][1] >= boardArray[guildId][channelId][255][1]) continue;
@@ -416,34 +418,52 @@ function displayBoard(guildId, channelId) {
       client.guilds
         .get(guildId)
         .channels.get(channelId)
-        .send(new Discord.RichEmbed()
-          .setColor('#00ff00')
-          .setAuthor('Congratulations!', jsonfile.logoGame)
-          .setImage(img))});
+        .send(
+          new Discord.RichEmbed()
+            .setColor("#00ff00")
+            .setAuthor("Congratulations!", jsonfile.logoGame)
+            .attachFile(new Discord.Attachment(img, "minesweeperboard.png"))
+            .setImage("attachment://minesweeperboard.png")
+        );
+    });
   } else if (exploded == false) {
     b.render(img => {
       client.guilds
         .get(guildId)
         .channels.get(channelId)
-        .send(new Discord.RichEmbed()
-          .setColor('#ff0000')
-          .setAuthor('You blew up.', jsonfile.logoGame)
-          .setImage(img))});
+        .send(
+          new Discord.RichEmbed()
+            .setColor("#ff0000")
+            .setAuthor("You blew up.", jsonfile.logoGame)
+            .attachFile(new Discord.Attachment(img, "minesweeperboard.png"))
+            .setImage("attachment://minesweeperboard.png")
+        );
+    });
   } else {
     b.render(img => {
       client.guilds
         .get(guildId)
         .channels.get(channelId)
-        .send(new Discord.RichEmbed()
-          .setAuthor('Minesweeper!', jsonfile.logoGame)
-          .setTitle('Standard (' + boardArray[guildId][channelId][255][0] + 'x' + boardArray[guildId][channelId][255][1] + ')')
-          .setDescription('\>dig \[A1\] to dig | \>flag \[A1\] (S,D,T,A) to flag')
-          .addField('Mines:',
-          'Single: ' + boardArray[guildId][channelId][255][2] +
-          ' | Double: ' + boardArray[guildId][channelId][255][3] +
-          ' | Triple: ' + boardArray[guildId][channelId][255][4] +
-          ' | Anti: ' + boardArray[guildId][channelId][255][5])
-          .setImage(img))});
+        .send(
+          new Discord.RichEmbed()
+            .setAuthor("Minesweeper!", jsonfile.logoGame)
+            .setTitle("Standard (" + boardArray[guildId][channelId][255][0] + "x" + boardArray[guildId][channelId][255][1] + ")")
+            .setDescription(">dig [A1] to dig | >flag [A1] (S,D,T,A) to flag")
+            .addField(
+              "Mines:",
+              "Single: " +
+                boardArray[guildId][channelId][255][2] +
+                " | Double: " +
+                boardArray[guildId][channelId][255][3] +
+                " | Triple: " +
+                boardArray[guildId][channelId][255][4] +
+                " | Anti: " +
+                boardArray[guildId][channelId][255][5]
+            )
+            .attachFile(new Discord.Attachment(img, "minesweeperboard.png"))
+            .setImage("attachment://minesweeperboard.png")
+        );
+    });
   }
   // add code to make message here pls
 }
