@@ -4,9 +4,10 @@
 const fs = require("fs");
 const Discord = require("discord.js");
 const client = new Discord.Client();
+const boardhandler = require("./MinesweeperBoardRenderer.js");
 var jsonfile = require("./configs.json");
 var tokenfile = require("./token.json");
-var boardArray = []; // Guild Id, Channel Id, X, (255 is board params [xSize, ySize, sMines, dMines, tMines, aMines]) Y, [Uncovered, Flag type, Mine type, Has mines around, totol of surrounding mines]
+var boardArray = []; // Guild Id, Channel Id, X, (255 is board params [xSize, ySize, sMines, dMines, tMines, aMines]) Y, [Uncovered, Flag type, Mine type, totol of surrounding mines]
 
 client.on("ready", () => {
   console.log("DPMS Bot Beta v0.1");
@@ -39,8 +40,15 @@ function processCommand(receivedMessage) {
     } else {
       receivedMessage.channel.send("Unknown command. Use >help for help.");
     }
-  } catch(err) {
-    receivedMessage.channel.send(err)
+  } catch (err) {
+    if(err.message!=="Failed: bomb exploded") {
+      if(err.message.indexOf("Error: ")==0) {
+        receivedMessage.channel.send(err.message);
+      } else {
+        receivedMessage.channel.send("I found an error :sob: ");
+        console.error(err);
+      }
+    }
   }
 
   /* else if (primaryCommand == "ruleset") {
@@ -62,15 +70,12 @@ function startCommand(msg, args) {
   if (args.length < 3 || args.length > 6) {
     return msg.channel.send("Invalid options. Use >help for help.");
   }
-  var o=args.map(x => parseInt(x.trim()));
-  while(o.length<6)o.push(0);
+  var o = args.map(x => parseInt(x.trim()));
+  while (o.length < 6) o.push(0);
   [xSize, ySize, sMines, dMines, tMines, aMines] = o;
   [guildId, channelId] = [msg.guild.id, msg.channel.id];
   if (Object.keys(boardArray).includes(guildId)) {
-    if (Object.keys(boardArray[guildId]).includes(channelId))
-      return msg.channel.send(
-        "No game running here. Learn how to start one in >help"
-      );
+    if (Object.keys(boardArray[guildId]).includes(channelId)) return msg.channel.send("No game running here. Learn how to start one in >help");
   }
   if (!Object.keys(boardArray).includes(guildId)) {
     boardArray[guildId] = {};
@@ -90,14 +95,7 @@ function startCommand(msg, args) {
     randMine = 0;
   var totalMines = sMines + dMines + tMines + aMines;
 
-  boardArray[guildId][channelId][255] = [
-    xSize,
-    ySize,
-    sMines,
-    dMines,
-    tMines,
-    aMines
-  ];
+  boardArray[guildId][channelId][255] = [xSize, ySize, sMines, dMines, tMines, aMines];
   var xRand = 0,
     yRand = 0;
   var regenMine = true;
@@ -109,15 +107,15 @@ function startCommand(msg, args) {
     }
   }
 
-  var previousMineCoords=[];
+  var previousMineCoords = [];
   for (var i = 0; i < totalMines; i++) {
     xRand = Math.floor(Math.random() * xSize);
     yRand = Math.floor(Math.random() * ySize);
-    while(previousMineCoords.filter(x=>x[0]==xRand&&x[1]==yRand).length>=1){
+    while (previousMineCoords.filter(x => x[0] == xRand && x[1] == yRand).length >= 1) {
       xRand = Math.floor(Math.random() * xSize);
       yRand = Math.floor(Math.random() * ySize);
     }
-    regenMine=true;
+    regenMine = true;
     while (regenMine == true) {
       randMine = randomMine();
       if (randMine == 1) {
@@ -154,36 +152,26 @@ function startCommand(msg, args) {
       }
     }
     boardArray[guildId][channelId][xRand][yRand][2] = randMine;
-    floodFill(guildId, channelId,xRand,yRand,boardArray[guildId][channelId][255][0],boardArray[guildId][channelId][255][1]);
-    previousMineCoords.push([xRand,yRand]);
+    previousMineCoords.push([xRand, yRand]);
   }
 
-  var o=[];
-  var k=Object.keys(boardArray[guildId][channelId]);
-  for(var j=0;j<k.length;j++) {
-    if(k[j].toString()=="255")o.push("Data: "+JSON.stringify(boardArray[guildId][channelId][k[i]]));
-    else o.push(boardArray[guildId][channelId][k[j]].map(x=>JSON.stringify(x)).join(' | '));
-  }
-  msg.channel.send(o);
-  // add code to make message here pls
+  fillNumbers(guildId, channelId);
+
+  displayBoard(guildId, channelId);
 }
 function flagCommand(msg, args) {
   // coord is type string, such as 'A1' or 'G6' | flagType is type string, only 'S', 'D', 'T' or 'A' (case-insensitive)
   if (args.length < 1 || args.length > 2) {
     return msg.channel.send("Invalid options. Use >help for help.");
   }
-  if (args.length == 1) args[2] = "s";
+  if (args.length == 1) args[1] = "s";
   [coord, flagType] = args;
   [guildId, channelId] = [msg.guild.id, msg.channel.id];
   if (!Object.keys(boardArray).includes(guildId)) {
-    return msg.channel.send(
-      "No game running here. Learn how to start one in >help"
-    );
+    return msg.channel.send("No game running here. Learn how to start one in >help");
   }
   if (!Object.keys(boardArray[guildId]).includes(channelId)) {
-    return msg.channel.send(
-      "No game running here. Learn how to start one in >help"
-    );
+    return msg.channel.send("No game running here. Learn how to start one in >help");
   }
 
   var newCoord;
@@ -202,9 +190,7 @@ function flagCommand(msg, args) {
     throw new Error("Error: No board");
   } else if (newCoord.row > xMax || newCoord.col > yMax) {
     throw new Error("Error: Outside board range");
-  } else if (
-    boardArray[guildId][channelId][newCoord.row][newCoord.col][0] == 1
-  ) {
+  } else if (boardArray[guildId][channelId][newCoord.row][newCoord.col][0] == 1) {
     throw new Error("Error: Attempted to flag uncovered square");
   } else {
     if (boardArray[guildId][channelId][newCoord.row][newCoord.col][1] == 0) {
@@ -213,7 +199,10 @@ function flagCommand(msg, args) {
       boardArray[guildId][channelId][newCoord.row][newCoord.col][1] = 0;
     }
   }
+
+  displayBoard(guildId, channelId);
 }
+
 function digCommand(msg, args) {
   if (args.length != 1) {
     return msg.channel.send("Invalid options. Use >help for help.");
@@ -221,14 +210,10 @@ function digCommand(msg, args) {
   [coord] = args;
   [guildId, channelId] = [msg.guild.id, msg.channel.id];
   if (!Object.keys(boardArray).includes(guildId)) {
-    return msg.channel.send(
-      "No game running here. Learn how to start one in >help"
-    );
+    return msg.channel.send("No game running here. Learn how to start one in >help");
   }
   if (!Object.keys(boardArray[guildId]).includes(channelId)) {
-    return msg.channel.send(
-      "No game running here. Learn how to start one in >help"
-    );
+    return msg.channel.send("No game running here. Learn how to start one in >help");
   }
 
   var newCoord;
@@ -240,199 +225,206 @@ function digCommand(msg, args) {
   var xMax = boardArray[guildId][channelId][255][0];
   var yMax = boardArray[guildId][channelId][255][1];
 
-  if (boardArray[guildId][channelId][255] == undefined) {
-    throw new Error("Error: No board");
-  } else if (newCoord.row > xMax || newCoord.col > yMax) {
+  if (newCoord.row > xMax || newCoord.col > yMax) {
     throw new Error("Error: Outside board range");
-  } else if (
-    boardArray[guildId][channelId][newCoord.row][newCoord.col][1] > 0
-  ) {
+  } else if (boardArray[guildId][channelId][newCoord.row][newCoord.col][1] != 0) {
     throw new Error("Error: Attempted to dig flagged square");
-  } else if (
-    boardArray[guildId][channelId][newCoord.row][newCoord.col][0] == 1
-  ) {
+  } else if (boardArray[guildId][channelId][newCoord.row][newCoord.col][0] == 1) {
     throw new Error("Error: Square already uncovered");
   } else {
-    // boardArray[guildId][channelId][newCoord.row][newCoord.col][1] =
-    findMines(guildId, channelId, newCoord.row, newCoord.col, xMax, yMax);
+    floodFill(guildId, channelId, newCoord.row, newCoord.col);
   }
+
+  displayBoard(guildId, channelId);
 }
 
-function floodFill()
-
-// other functions
-function floodFill(guildId, channelId, posX, posY, xMax, yMax) {
-  if (boardArray[guildId][channelId][posX][posY][3] == 0) {
-    findMines(guildId, channelId, posX, posY, xMax, yMax);
-    floodFill(guildId, channelId, posX + 1, posY);
-    floodFill(guildId, channelId, posX + 1, posY + 1);
-    floodFill(guildId, channelId, posX, posY + 1);
-    floodFill(guildId, channelId, posX - 1, posY + 1);
-    floodFill(guildId, channelId, posX - 1, posY);
-    floodFill(guildId, channelId, posX - 1, posY - 1);
-    floodFill(guildId, channelId, posX, posY - 1);
-    floodFill(guildId, channelId, posX + 1, posY - 1);
-  } else {
-    return;
-  }
+function bombExplode(guildId, channelId) {
+  displayBoard(guildId, channelId,exploded=true);
+  delete boardArray[guildId][channelId];
+  throw new Error("Failed: bomb exploded");
 }
-function findMines(guildId, channelId, posX, posY, xMax, yMax) {
-  var count = 0;
-  var mineCount = 0;
-  var pos = [0, 0, 0, 0, 0, 0, 0, 0]; // Top left, going clockwise
-  if (posX == 0 && posY == 0) {
-    pos = [0, 0, 0, 1, 1, 1, 0, 0]; // Tl
-  } else if (posX == xMax && posY == 0) {
-    pos = [0, 0, 0, 0, 0, 1, 1, 1]; // TR
-  } else if (posX == 0 && posY == yMax) {
-    pos = [0, 1, 1, 1, 0, 0, 0, 0]; // BL
-  } else if (posX == xMax && posY == yMax) {
-    pos = [1, 1, 0, 0, 0, 0, 0, 1]; // BR
-  } else if (posX == 0) {
-    pos = [0, 0, 0, 1, 1, 1, 1, 1]; // T
-  } else if (posX == xMax) {
-    pos = [1, 1, 1, 1, 0, 0, 0, 1]; // B
-  } else if (posY == 0) {
-    pos = [0, 1, 1, 1, 1, 1, 0, 0]; // L
-  } else if (posY == yMax) {
-    pos = [1, 1, 0, 0, 0, 1, 1, 1]; // R
-  } else {
-    pos = [1, 1, 1, 1, 1, 1, 1, 1];
-  } // and that is how NOT to code.
-  for (var i = 0; i < 8; i++) {
-    if (pos[i] == 0) {
-      continue;
-    } else {
-      // boardArray[guildId][channelId][posX][posY][3] = 1
-      switch (i) {
-        case 0:
-          count += boardArray[guildId][channelId][posX + 1][posY - 1][2];
-          if (boardArray[guildId][channelId][posX + 1][posY - 1][2] != 0) {
-            mineCount++;
-          }
-          break;
-        case 1:
-          count += boardArray[guildId][channelId][posX - 1][posY][2];
-          if (boardArray[guildId][channelId][posX - 1][posY][2] != 0) {
-            mineCount++;
-          }
-          break;
-        case 2:
-          count += boardArray[guildId][channelId][posX - 1][posY + 1][2];
-          if (boardArray[guildId][channelId][posX - 1][posY + 1][2] != 0) {
-            mineCount++;
-          }
-          break;
-        case 3:
-          count += boardArray[guildId][channelId][posX][posY + 1][2];
-          if (boardArray[guildId][channelId][posX][posY + 1][2] != 0) {
-            mineCount++;
-          }
-          break;
-        case 4:
-          count += boardArray[guildId][channelId][posX + 1][posY + 1][2];
-          if (boardArray[guildId][channelId][posX + 1][posY + 1][2] != 0) {
-            mineCount++;
-          }
-          break;
-        case 5:
-          count += boardArray[guildId][channelId][posX + 1][posY][2];
-          if (boardArray[guildId][channelId][posX + 1][posY][2] != 0) {
-            mineCount++;
-          }
-          break;
-        case 6:
-          count += boardArray[guildId][channelId][posX + 1][posY - 1][2];
-          if (boardArray[guildId][channelId][posX + 1][posY - 1][2] != 0) {
-            mineCount++;
-          }
-          break;
-        case 7:
-          count += boardArray[guildId][channelId][posX][posY - 1][2];
-          if (boardArray[guildId][channelId][posX][posY - 1][2] != 0) {
-            mineCount++;
-          }
-          break;
-      }
-      if (mineCount > 0) {
-        boardArray[guildId][channelId][posX][posY][3] = 1;
-        boardsArray[guildId][channelId][posX][posY][4] = count;
-      }
-      floodFill(guildId, channelId, posX, posY, xMax, yMax);
+
+function fillNumbers(guildId, channelId) {
+  var b = boardArray[guildId][channelId];
+  for (var i = 0; i < b[255][0]; i++) {
+    for (var j = 0; j < b[255][1]; j++) {
+      boardArray[guildId][channelId][i][j][3] = findMines(guildId, channelId, i, j);
     }
   }
 }
+
+function findMines(guildId, channelId, x, y) {
+  var toCheck = [
+    [x - 1, y - 1],
+    [x - 1, y],
+    [x - 1, y + 1],
+    [x, y - 1],
+    [x, y + 1],
+    [x + 1, y - 1],
+    [x + 1, y],
+    [x + 1, y + 1]
+  ];
+  var c = 0;
+  for (var i = 0; i < toCheck.length; i++) {
+    if (toCheck[i][0] < 0 || toCheck[i][1] < 0 || toCheck[i][0] >= boardArray[guildId][channelId][255][0] || toCheck[i][1] >= boardArray[guildId][channelId][255][1]) continue;
+    switch (boardArray[guildId][channelId][toCheck[i][0]][toCheck[i][1]][2]) {
+      case -1:
+        c--;
+        break;
+      case 1:
+        c++;
+        break;
+      case 2:
+        c+=2;
+        break;
+      case 3:
+        c+=3;
+        break;
+    }
+  }
+  return c;
+}
+
+function floodFill(guildId, channelId, posX, posY) {
+  var toCheck = [[posX, posY]];
+  var i = -1;
+  while (i < (toCheck.length-1)) {
+    i++;
+    if (toCheck[i][0] < 0 || toCheck[i][0] >= boardArray[guildId][channelId][255][0]) continue;
+    if (toCheck[i][1] < 0 || toCheck[i][1] >= boardArray[guildId][channelId][255][1]) continue;
+    boardArray[guildId][channelId][toCheck[i][0]][toCheck[i][1]][0] = 1;
+    if (boardArray[guildId][channelId][toCheck[i][0]][toCheck[i][1]][2] != 0) {
+      bombExplode(guildId, channelId);
+    }
+    var cell = boardArray[guildId][channelId][toCheck[i][0]][toCheck[i][1]];
+    if (cell[1] == 0 && cell[2] == 0 && cell[3] == 0) {
+      // check if cell is blank
+      var x = toCheck[i][0];
+      var y = toCheck[i][1];
+      if (!floodFillChecker(toCheck, [x - 1, y - 1])) toCheck.push([x - 1, y - 1]);
+      if (!floodFillChecker(toCheck, [x - 1, y])) toCheck.push([x - 1, y]);
+      if (!floodFillChecker(toCheck, [x - 1, y + 1])) toCheck.push([x - 1, y + 1]);
+      if (!floodFillChecker(toCheck, [x, y - 1])) toCheck.push([x, y - 1]);
+      if (!floodFillChecker(toCheck, [x, y + 1])) toCheck.push([x, y + 1]);
+      if (!floodFillChecker(toCheck, [x + 1, y - 1])) toCheck.push([x + 1, y - 1]);
+      if (!floodFillChecker(toCheck, [x + 1, y])) toCheck.push([x + 1, y]);
+      if (!floodFillChecker(toCheck, [x + 1, y + 1])) toCheck.push([x + 1, y + 1]);
+    }
+  }
+}
+
+function floodFillChecker(arr, pos) {
+  return arr.some(d => JSON.stringify(d) === JSON.stringify(pos));
+}
+
 function randomMine() {
   return Math.floor(Math.random() * 4 + 1);
 }
 function flagToInt(flagType) {
-  if (flagType.toLowerCase() == "s") {
-    return 1;
-  } else if (flagType.toLowerCase() == "d") {
-    return 2;
-  } else if (flagType.toLowerCase() == "t") {
-    return 3;
-  } else if (flagType.toLowerCase() == "a") {
-    return 4;
-  } else {
-    throw new Error("Error: Invalid flag type");
+  switch (flagType.toLowerCase()) {
+    case "s":
+      return 1;
+    case "d":
+      return 2;
+    case "t":
+      return 3;
+    case "a":
+      return 4;
+    default:
+      throw new Error("Error: Invalid flag type");
   }
 }
 
-function drawGrid(guildId, channelId) {
-  // still need to finish lol
-  var xSize = boardArray[guildId][channelId][255][0];
-  var ySize = boardArray[guildId][channelId][255][1];
-  var mines = [
-    boardArray[guildId][channelId][255][2],
-    boardArray[guildId][channelId][255][3],
-    boardArray[guildId][channelId][255][4],
-    boardArray[guildId][channelId][255][5]
-  ];
-
-  for (var i = 0; i < xSize; i++) {}
-}
-
 // past here is copied code
-function cellA1ToIndex(cellA1, index) {
-  // Ensure index is (default) 0 or 1, no other values accepted.
-  index = index || 0;
-  index = index == 0 ? 0 : 1;
-
+function cellA1ToIndex(cellA1) {
   // Use regex match to find column & row references.
   // Must start with letters, end with numbers.
-  // This regex still allows induhviduals to provide illegal strings like "AB.#%123"
-  var match = cellA1.match(/(^[A-Z]+)|([0-9]+$)/gm);
+  cellA1 = cellA1.toUpperCase();
+  var match = /^([A-Z]+)([0-9]+)$/gm.exec(cellA1);
 
-  if (match.length != 2) throw new Error("Error: Invalid cell reference");
+  if (match == null) throw new Error("Error: Invalid cell reference");
 
-  var colA1 = match[0];
-  var rowA1 = match[1];
+  var colA1 = match[1];
+  var rowA1 = match[2];
 
-  return { row: rowA1ToIndex(rowA1, index), col: colA1ToIndex(colA1, index) };
+  return { row: rowA1ToIndex(rowA1), col: colA1ToIndex(colA1) };
 }
-function colA1ToIndex(colA1, index) {
-  if (typeof colA1 !== "string" || colA1.length > 2)
-    throw new Error("Expected column label.");
 
-  // Ensure index is (default) 0 or 1, no other values accepted.
-  index = index || 0;
-  index = index == 0 ? 0 : 1;
+function colA1ToIndex(colA1) {
+  if (typeof colA1 !== "string" || colA1.length > 2) throw new Error("Expected column label.");
 
   var A = "A".charCodeAt(0);
-
   var number = colA1.charCodeAt(colA1.length - 1) - A;
   if (colA1.length == 2) {
     number += 26 * (colA1.charCodeAt(0) - A + 1);
   }
-  return number + index;
+  return number;
 }
-function rowA1ToIndex(rowA1, index) {
-  // Ensure index is (default) 0 or 1, no other values accepted.
-  index = index || 0;
-  index = index == 0 ? 0 : 1;
 
-  return rowA1 - 1 + index;
+function rowA1ToIndex(rowA1) {
+  return rowA1 - 1;
 }
+
+function displayBoard(guildId, channelId) {
+  // temporary print script
+  /*var o = [];
+  var k = Object.keys(boardArray[guildId][channelId]);
+  for (var l = 0; l < k.length; l++) {
+    if (k[l].toString() == "255") o.push("Data: " + JSON.stringify(boardArray[guildId][channelId][k[l]]));
+    else o.push(boardArray[guildId][channelId][k[l]].map(x => JSON.stringify(x)).join(" | "));
+  }
+  client.guilds
+    .get(guildId)
+    .channels.get(channelId)
+    .send(o.join("\n"));*/
+
+  var g = [];
+  for (var i = 0; i < boardArray[guildId][channelId][255][0]; i++) {
+    g.push([]);
+    for (var j = 0; j < boardArray[guildId][channelId][255][1]; j++) {
+      g[i].push(calculateCurrentCellView(boardArray[guildId][channelId][i][j]));
+    }
+  }
+  var b = new boardhandler.MinesweeperBoard(g, boardArray[guildId][channelId][255][0], boardArray[guildId][channelId][255][1]);
+  b.render(img => {
+    client.guilds
+      .get(guildId)
+      .channels.get(channelId)
+      .send(new Discord.Attachment(img));
+  });
+  // add code to make message here pls
+}
+
+function calculateCurrentCellView(cell, showExploded = true) {
+  if (cell[0]) {
+    switch (cell[2]) {
+      case 1:
+        return (showExploded ? "x" : "") + "bomb-s";
+      case 2:
+        return (showExploded ? "x" : "") + "bomb-d";
+      case 3:
+        return (showExploded ? "x" : "") + "bomb-t";
+      case -1:
+        return (showExploded ? "x" : "") + "bomb-a";
+      default:
+        if (cell[3] == 0) return "blank";
+        return "cell" + cell[3];
+    }
+  } else {
+    switch (cell[1]) {
+      case 1:
+        return "flag-s";
+      case 2:
+        return "flag-d";
+      case 3:
+        return "flag-t";
+      case 4:
+        return "flag-a";
+      default:
+        return "hidden";
+    }
+  }
+}
+
 // login stuffs
 client.login(tokenfile.token);

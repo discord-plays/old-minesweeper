@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/mrmelon54/discord-plays-minesweeper#readme",
   "dependencies": {
-    "discord.js": "^11.5.1"
+    "discord.js": "^11.5.1",
+    "jimp": "^0.9.3"
   }
 }
