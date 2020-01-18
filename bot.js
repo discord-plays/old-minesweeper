@@ -160,7 +160,7 @@ function startCommand(msg, args) {
 
   fillNumbers(guildId, channelId);
 
-  displayBoard(guildId, channelId);
+  displayBoard(guildId, channelId,exploded=false,won=true);
 }
 function flagCommand(msg, args) {
   // coord is type string, such as 'A1' or 'G6' | flagType is type string, only 'S', 'D', 'T' or 'A' (case-insensitive)
@@ -203,7 +203,7 @@ function flagCommand(msg, args) {
     }
   }
 
-  displayBoard(guildId, channelId);
+  displayBoard(guildId, channelId,exploded=false,won=true);
 }
 
 function digCommand(msg, args) {
@@ -255,7 +255,7 @@ function digCommand(msg, args) {
     gameWin(guildId, channelId);
   }
 
-  displayBoard(guildId, channelId);
+  displayBoard(guildId, channelId,exploded=false,won=true);
 }
 
 function bombExplode(guildId, channelId) {
