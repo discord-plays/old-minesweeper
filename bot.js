@@ -41,6 +41,7 @@ function processCommand(receivedMessage) {
       receivedMessage.channel.send("Unknown command. Use >help for help.");
     }
   } catch (err) {
+    /*
     if(err.message!=="Failed: bomb exploded") {
       if(err.message.indexOf("Error: ")==0) {
         receivedMessage.channel.send(err.message);
@@ -49,12 +50,14 @@ function processCommand(receivedMessage) {
         console.error(err);
       }
     }
-  }
+    */
 
-  /* else if (primaryCommand == "ruleset") {
-      rulesetCommand();
-    } */
-} // add error functionality
+    receivedMessage.channel.send(new Discord.RichEmbed()
+      .setColor('#ff0000')
+      .setAuthor('Uh Oh...')
+      .setTitle(err));
+  }
+}
 function helpCommand(msg, args) {
   var o = [
     "This is some unhelpful text :rofl: \n",
@@ -84,7 +87,7 @@ function startCommand(msg, args) {
     boardArray[guildId][channelId] = {};
   }
 
-  if (xSize > 26 || ySize > 26) {
+  if (xSize > 50 || ySize > 50) {
     throw new Error("Error: Board too big!");
   }
 
@@ -234,6 +237,23 @@ function digCommand(msg, args) {
   } else {
     floodFill(guildId, channelId, newCoord.row, newCoord.col);
   }
+  // detecting if you won code
+  var totalSquares = (xMax - 1) * (yMax - 1);
+  var totalNonMines = 0;
+  var totalUncovered = 0;
+  for (var i = 0; i < xMax; i++) {
+    for (var j = 0; j < yMax; j++) {
+      if (boardArray[guildId][channelId][i][j][2] == 0) {
+        totalNonMines++;
+      }
+      if (boardArray[guildId][channelId][i][j][0] == 1) {
+        totalUncovered++;
+      }
+    }
+  }
+  if (totalNonMines == totalUncovered) {
+    gameWin(guildId, channelId);
+  }
 
   displayBoard(guildId, channelId);
 }
@@ -241,7 +261,12 @@ function digCommand(msg, args) {
 function bombExplode(guildId, channelId) {
   displayBoard(guildId, channelId,exploded=true);
   delete boardArray[guildId][channelId];
-  throw new Error("Failed: bomb exploded");
+  // throw new Error("Failed: bomb exploded");
+}
+
+function gameWin(guildId, channelId) {
+  displayBoard(guildId, channelId, exploded=false, won=true);
+  delete boardArray[guildId, channelId];
 }
 
 function fillNumbers(guildId, channelId) {
@@ -364,7 +389,7 @@ function colA1ToIndex(colA1) {
 function rowA1ToIndex(rowA1) {
   return rowA1 - 1;
 }
-
+// thanks, melon :)
 function displayBoard(guildId, channelId) {
   // temporary print script
   /*var o = [];
@@ -386,12 +411,36 @@ function displayBoard(guildId, channelId) {
     }
   }
   var b = new boardhandler.MinesweeperBoard(g, boardArray[guildId][channelId][255][0], boardArray[guildId][channelId][255][1]);
-  b.render(img => {
-    client.guilds
-      .get(guildId)
-      .channels.get(channelId)
-      .send(new Discord.Attachment(img));
-  });
+  if (won == true) {
+    b.render(img => {
+      client.guilds
+        .get(guildId)
+        .channels.get(channelId)
+        .send(new Discord.RichEmbed()
+          .setColor('#00ff00')
+          .setAuthor('Congratulations!', jsonfile.logoGame)
+          .setImage(img));
+  } else if (exploded == false) {
+    b.render(img => {
+      client.guilds
+        .get(guildId)
+        .channels.get(channelId)
+        .send(new Discord.RichEmbed()
+          .setColor('#ff0000')
+          .setAuthor('You blew up.', jsonfile.logoGame)
+          .setImage(img));
+  } else {
+    b.render(img => {
+      client.guilds
+        .get(guildId)
+        .channels.get(channelId)
+        .send(new Discord.RichEmbed()
+          .setAuthor('Minesweeper!', jsonfile.logoGame)
+          .setTitle('Standard (' + boardArray[guildId][channelId][255][0] + 'x' + boardArray[guildId][channelId][255][1] + ')')
+          .setDescription('\>dig \[A1\] to dig | \>flag \[A1\] (S,D,T,A) to flag')
+          .setImage(img));
+          .addField('Mines:', 'Single: ' + boardArray[guildId][channelId][255][2] + ' | Double: ' + boardArray[guildId][channelId][255][3] + ' | Triple: ' boardArray[guildId][channelId][255][4] + ' | Anti: ' + boardArray[guildId][channelId][255][5]));
+  }
   // add code to make message here pls
 }
 
