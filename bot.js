@@ -438,8 +438,12 @@ function displayBoard(guildId, channelId) {
           .setAuthor('Minesweeper!', jsonfile.logoGame)
           .setTitle('Standard (' + boardArray[guildId][channelId][255][0] + 'x' + boardArray[guildId][channelId][255][1] + ')')
           .setDescription('\>dig \[A1\] to dig | \>flag \[A1\] (S,D,T,A) to flag')
-          .setImage(img)
-          .addField('Mines:', 'Single: ' + boardArray[guildId][channelId][255][2] + ' | Double: ' + boardArray[guildId][channelId][255][3] + ' | Triple: ' boardArray[guildId][channelId][255][4] + ' | Anti: ' + boardArray[guildId][channelId][255][5]))});
+          .addField('Mines:',
+          'Single: ' + boardArray[guildId][channelId][255][2] +
+          ' | Double: ' + boardArray[guildId][channelId][255][3] +
+          ' | Triple: ' + boardArray[guildId][channelId][255][4] +
+          ' | Anti: ' + boardArray[guildId][channelId][255][5])
+          .setImage(img))});
   }
   // add code to make message here pls
 }
