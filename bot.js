@@ -90,7 +90,7 @@ function startCommand(msg, args) {
   }
 
   if (xSize > 50 || ySize > 50) {
-    throw new Error("Error: Board too big!");
+    throw new Error("Board too big!");
   }
 
   var sCount = 0,
@@ -153,7 +153,7 @@ function startCommand(msg, args) {
           randMine = -1;
         }
       } else {
-        throw new Error("Error: Invalid Value for randMine");
+        throw new Error("Invalid Value for randMine");
       }
     }
     boardArray[guildId][channelId][xRand][yRand][2] = randMine;
@@ -162,7 +162,7 @@ function startCommand(msg, args) {
 
   fillNumbers(guildId, channelId);
 
-  displayBoard(guildId, channelId, (exploded = false), (won = true));
+  displayBoard(guildId, channelId, (exploded = false), (won = false));
 }
 function flagCommand(msg, args) {
   // coord is type string, such as 'A1' or 'G6' | flagType is type string, only 'S', 'D', 'T' or 'A' (case-insensitive)
@@ -192,11 +192,11 @@ function flagCommand(msg, args) {
   var yMax = boardArray[guildId][channelId][255][1];
 
   if (boardArray[guildId][channelId][255] == undefined) {
-    throw new Error("Error: No board");
+    throw new Error("No board");
   } else if (newCoord.row > xMax || newCoord.col > yMax) {
-    throw new Error("Error: Outside board range");
+    throw new Error("Outside board range");
   } else if (boardArray[guildId][channelId][newCoord.row][newCoord.col][0] == 1) {
-    throw new Error("Error: Attempted to flag uncovered square");
+    throw new Error("Attempted to flag uncovered square");
   } else {
     if (boardArray[guildId][channelId][newCoord.row][newCoord.col][1] == 0) {
       boardArray[guildId][channelId][newCoord.row][newCoord.col][1] = flagInt;
@@ -205,7 +205,7 @@ function flagCommand(msg, args) {
     }
   }
 
-  displayBoard(guildId, channelId, (exploded = false), (won = true));
+  displayBoard(guildId, channelId, (exploded = false), (won = false));
 }
 
 function digCommand(msg, args) {
@@ -231,11 +231,11 @@ function digCommand(msg, args) {
   var yMax = boardArray[guildId][channelId][255][1];
 
   if (newCoord.row > xMax || newCoord.col > yMax) {
-    throw new Error("Error: Outside board range");
+    throw new Error("Outside board range");
   } else if (boardArray[guildId][channelId][newCoord.row][newCoord.col][1] != 0) {
-    throw new Error("Error: Attempted to dig flagged square");
+    throw new Error("Attempted to dig flagged square");
   } else if (boardArray[guildId][channelId][newCoord.row][newCoord.col][0] == 1) {
-    throw new Error("Error: Square already uncovered");
+    throw new Error("Square already uncovered");
   } else {
     floodFill(guildId, channelId, newCoord.row, newCoord.col);
   }
@@ -358,7 +358,7 @@ function flagToInt(flagType) {
     case "a":
       return 4;
     default:
-      throw new Error("Error: Invalid flag type");
+      throw new Error("Invalid flag type");
   }
 }
 
@@ -369,7 +369,7 @@ function cellA1ToIndex(cellA1) {
   cellA1 = cellA1.toUpperCase();
   var match = /^([A-Z]+)([0-9]+)$/gm.exec(cellA1);
 
-  if (match == null) throw new Error("Error: Invalid cell reference");
+  if (match == null) throw new Error("Invalid cell reference");
 
   var colA1 = match[1];
   var rowA1 = match[2];
@@ -426,7 +426,7 @@ function displayBoard(guildId, channelId) {
             .setImage("attachment://minesweeperboard.png")
         );
     });
-  } else if (exploded == false) {
+  } else if (exploded == true) {
     b.render(img => {
       client.guilds
         .get(guildId)
