@@ -108,7 +108,7 @@ function startCommand(msg, args) {
   for (i = 0; i < xSize; i++) {
     boardArray[guildId][channelId][i] = [];
     for (j = 0; j < ySize; j++) {
-      boardArray[guildId][channelId][i][j] = [0, 0, 0, 0];
+      boardArray[guildId][channelId][i][j] = [0, 0, 0, 255];
     }
   }
 
@@ -291,20 +291,24 @@ function findMines(guildId, channelId, x, y) {
     [x + 1, y],
     [x + 1, y + 1]
   ];
-  var c = 0;
+  var c = 255;
   for (var i = 0; i < toCheck.length; i++) {
     if (toCheck[i][0] < 0 || toCheck[i][1] < 0 || toCheck[i][0] >= boardArray[guildId][channelId][255][0] || toCheck[i][1] >= boardArray[guildId][channelId][255][1]) continue;
     switch (boardArray[guildId][channelId][toCheck[i][0]][toCheck[i][1]][2]) {
       case -1:
+        if(c==255)c=0;
         c--;
         break;
       case 1:
+        if(c==255)c=0;
         c++;
         break;
       case 2:
+        if(c==255)c=0;
         c += 2;
         break;
       case 3:
+        if(c==255)c=0;
         c += 3;
         break;
     }
@@ -321,10 +325,10 @@ function floodFill(guildId, channelId, posX, posY) {
     if (toCheck[i][1] < 0 || toCheck[i][1] >= boardArray[guildId][channelId][255][1]) continue;
     boardArray[guildId][channelId][toCheck[i][0]][toCheck[i][1]][0] = 1;
     if (boardArray[guildId][channelId][toCheck[i][0]][toCheck[i][1]][2] != 0) {
-      bombExplode(guildId, channelId);
+      return bombExplode(guildId, channelId);
     }
     var cell = boardArray[guildId][channelId][toCheck[i][0]][toCheck[i][1]];
-    if (cell[1] == 0 && cell[2] == 0 && cell[3] == 0) {
+    if (cell[1] == 0 && cell[2] == 0 && cell[3] == 255) {
       // check if cell is blank
       var x = toCheck[i][0];
       var y = toCheck[i][1];
@@ -392,6 +396,7 @@ function rowA1ToIndex(rowA1) {
   return rowA1 - 1;
 }
 // thanks, melon :)
+// no problemo bro xD
 function displayBoard(guildId, channelId) {
   // temporary print script
   /*var o = [];
@@ -480,7 +485,7 @@ function calculateCurrentCellView(cell, showExploded = true) {
       case -1:
         return (showExploded ? "x" : "") + "bomb-a";
       default:
-        if (cell[3] == 0) return "blank";
+        if (cell[3] == 255) return "blank";
         return "cell" + cell[3];
     }
   } else {
