@@ -417,7 +417,7 @@ function displayBoard(guildId, channelId) {
       g[i].push(calculateCurrentCellView(boardArray[guildId][channelId][i][j]));
     }
   }
-  var b = new boardhandler.MinesweeperBoard(g, boardArray[guildId][channelId][255][0], boardArray[guildId][channelId][255][1]);
+  var b = new boardhandler.MinesweeperBoard(g, boardArray[guildId][channelId][255][1], boardArray[guildId][channelId][255][0]);
   if (won == true) {
     b.render(img => {
       client.guilds
