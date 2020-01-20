@@ -210,8 +210,14 @@ function flagCommand(msg, args) {
 }
 
 function digCommand(msg, args) {
-  if (args.length != 1) {
+  if (args.length >= 1) {
     return msg.channel.send("Invalid options. Use >help for help.");
+  }
+  if(args.length>1){
+    for(var i=0;i<args.length;i++){
+      digCommand(msg,args[i]);
+    }
+    return;
   }
   [coord] = args;
   [guildId, channelId] = [msg.guild.id, msg.channel.id];
