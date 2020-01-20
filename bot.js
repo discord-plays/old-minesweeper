@@ -80,7 +80,7 @@ function startCommand(msg, args) {
   [xSize, ySize, sMines, dMines, tMines, aMines] = o;
   [guildId, channelId] = [msg.guild.id, msg.channel.id];
   if (Object.keys(boardArray).includes(guildId)) {
-    if (Object.keys(boardArray[guildId]).includes(channelId)) return msg.channel.send("No game running here. Learn how to start one in >help");
+    if (Object.keys(boardArray[guildId]).includes(channelId)) return msg.channel.send("There is already a game running here. Try in another channel.");
   }
   if (!Object.keys(boardArray).includes(guildId)) {
     boardArray[guildId] = {};
