@@ -215,7 +215,7 @@ function digCommand(msg, args) {
   }
   if(args.length>1){
     for(var i=0;i<args.length;i++){
-      digCommand(msg,args[i]);
+      digCommand(msg,[args[i]]);
     }
     return;
   }
