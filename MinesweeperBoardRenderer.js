@@ -55,7 +55,10 @@ const minesweeperIconsMap = [
   "xbomb-s",
   "xbomb-d",
   "xbomb-t",
-  "xbomb-a"
+  "xbomb-a",
+  "",
+  "",
+  "corner"
 ];
 
 class MinesweeperBoard {
@@ -68,13 +71,14 @@ class MinesweeperBoard {
     var t=this;
     Jimp.read("minesweeper-icons.png").then(iconsimg => {
       t.iconsimg=iconsimg;
-      var r=new Jimp(16*this.w,16*this.h,(err,baseimg)=>{
+      var r=new Jimp(16*(this.w+1),16*(this.h+1),(err,baseimg)=>{
         if(err) throw err;
         this.b.forEach((row,y)=>{
           row.forEach((icontype,x)=>{
-            baseimg.composite(t.getIcon(icontype),x*16,y*16);
+            baseimg.composite(t.getIcon(icontype),(1+x)*16,(1+y)*16);
           });
         });
+        baseimg.composite(t.getIcon("corner"),0,0);
         baseimg.resize(this.w*64,Jimp.AUTO,Jimp.RESIZE_NEAREST_NEIGHBOR).getBuffer(Jimp.MIME_PNG, (error, result) => {
           if(error) throw error;
           callback(result);
