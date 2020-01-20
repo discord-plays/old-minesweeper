@@ -91,6 +91,7 @@ function startCommand(msg, args) {
 
   if (xSize > 50 || ySize > 50) {
     throw new Error("Board too big!");
+    delete boardArray[guildId][channelId];
     return;
   }
 
