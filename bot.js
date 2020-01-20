@@ -209,13 +209,13 @@ function flagCommand(msg, args) {
   displayBoard(guildId, channelId, (exploded = false), (won = false));
 }
 
-function digCommand(msg, args) {
+function digCommand(msg, args,_a=true) {
   if (args.length < 1) {
     return msg.channel.send("Invalid options. Use >help for help.");
   }
   if(args.length>1){
     for(var i=0;i<args.length;i++){
-      digCommand(msg,[args[i]]);
+      digCommand(msg,[args[i]],i==args.length-1);
     }
     return;
   }
@@ -264,7 +264,7 @@ function digCommand(msg, args) {
     return gameWin(guildId, channelId);
   }
 
-  displayBoard(guildId, channelId);
+  if(_a)displayBoard(guildId, channelId);
 }
 
 function bombExplode(guildId, channelId) {
