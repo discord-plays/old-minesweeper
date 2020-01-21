@@ -44,7 +44,7 @@ function processCommand(receivedMessage) {
       flagCommand(receivedMessage, arguments);
     } else if (primaryCommand == "dig") {
       digCommand(receivedMessage, arguments);
-    } else if(primaryCommand=="board") {
+    } else if (primaryCommand == "board") {
       boardCommand(receivedMessage, arguments);
     } else {
       receivedMessage.channel.send("Unknown command. Use >help for help.");
@@ -94,7 +94,7 @@ function startCommand(msg, args) {
     boardArray[guildId][channelId] = {};
   }
 
-  if(xSize<=0||ySize<=0) {
+  if (xSize <= 0 || ySize <= 0) {
     delete boardArray[guildId][channelId];
     throw new Error("Error: Board too small!");
   }
@@ -110,7 +110,7 @@ function startCommand(msg, args) {
     randMine = 0;
   var totalMines = sMines + dMines + tMines + aMines;
 
-  if(xSize*ySize < totalMines) {
+  if (xSize * ySize < totalMines) {
     throw new Error("Error: Too many mines for the board!");
   }
 
@@ -178,8 +178,8 @@ function startCommand(msg, args) {
 
   displayBoard(guildId, channelId, (exploded = false), (won = false));
 }
-function boardCommand(msg,args) {
-  if (args.length >0) {
+function boardCommand(msg, args) {
+  if (args.length > 0) {
     return msg.channel.send("Invalid options. Use >help for help.");
   }
   [guildId, channelId] = [msg.guild.id, msg.channel.id];
@@ -194,11 +194,9 @@ function boardCommand(msg,args) {
 }
 function flagCommand(msg, args) {
   // coord is type string, such as 'A1' or 'G6' | flagType is type string, only 'S', 'D', 'T' or 'A' (case-insensitive)
-  if (args.length < 1 || args.length > 2) {
+  if (args.length < 1) {
     return msg.channel.send("Invalid options. Use >help for help.");
   }
-  if (args.length == 1) args[1] = "s";
-  [coord, flagType] = args;
   [guildId, channelId] = [msg.guild.id, msg.channel.id];
   if (!Object.keys(boardArray).includes(guildId)) {
     return msg.channel.send("No game running here. Learn how to start one in >help");
@@ -206,34 +204,76 @@ function flagCommand(msg, args) {
   if (!Object.keys(boardArray[guildId]).includes(channelId)) {
     return msg.channel.send("No game running here. Learn how to start one in >help");
   }
-
-  var newCoord;
-  var flagInt;
-  try {
-    newCoord = cellA1ToIndex(coord);
-    flagInt = flagToInt(flagType);
-  } catch (err) {
-    throw err;
-  }
-
   var xMax = boardArray[guildId][channelId][255][0];
   var yMax = boardArray[guildId][channelId][255][1];
 
-  if (boardArray[guildId][channelId][255] == undefined) {
-    throw new Error("Error: No board");
-  } else if (newCoord.row > xMax || newCoord.col > yMax) {
-    throw new Error("Error: Outside board range");
-  } else if (boardArray[guildId][channelId][newCoord.row][newCoord.col][0] == 1) {
-    throw new Error("Error: Attempted to flag uncovered square");
-  } else {
-    if (boardArray[guildId][channelId][newCoord.row][newCoord.col][1] == 0) {
-      boardArray[guildId][channelId][newCoord.row][newCoord.col][1] = flagInt;
-    } else {
-      boardArray[guildId][channelId][newCoord.row][newCoord.col][1] = 0;
+  ap = parseFlagCommandArgs(args);
+  for (var j = 0; j < ap.length; j++) {
+    args = ap[j];
+    flagType = args.pop();
+    coords = args;
+
+    for (var i = 0; i < coords.length; i++) {
+      var coord = coords[i];
+      var newCoord;
+      var flagInt;
+      try {
+        newCoord = cellA1ToIndex(coord);
+        flagInt = flagToInt(flagType);
+      } catch (err) {
+        throw err;
+      }
+
+      if (boardArray[guildId][channelId][255] == undefined) {
+        throw new Error("Error: No board");
+      } else if (newCoord.row > xMax || newCoord.col > yMax) {
+        throw new Error("Error: Outside board range");
+      } else if (boardArray[guildId][channelId][newCoord.row][newCoord.col][0] == 1) {
+        throw new Error("Error: Attempted to flag uncovered square");
+      } else {
+        if (boardArray[guildId][channelId][newCoord.row][newCoord.col][1] == 0) {
+          boardArray[guildId][channelId][newCoord.row][newCoord.col][1] = flagInt;
+        } else {
+          boardArray[guildId][channelId][newCoord.row][newCoord.col][1] = 0;
+        }
+      }
     }
   }
-
   displayBoard(guildId, channelId, (exploded = false), (won = false));
+}
+
+function parseFlagCommandArgs(args) {
+  var o = [];
+  var section = [];
+  var error = false;
+  for (var i = 0; i < args.length; i++) {
+    try {
+      cellA1ToIndex(args[i]);
+      section.push(args[i]);
+      continue;
+    } catch (err) {
+      if (section.length == 0) {
+        error = true;
+        break;
+      }
+    }
+    try {
+      flagToInt(args[i]);
+      section.push(args[i]);
+      o.push([...section]);
+      section = [];
+      continue;
+    } catch (err) {
+      error = true;
+      break;
+    }
+  }
+  if (error) throw new Error("Error: Arguments invalid for flag command");
+  if (section.length > 0) {
+    section.push("s");
+    o.push(section);
+  }
+  return o;
 }
 
 function digCommand(msg, args, _a = true) {
@@ -255,14 +295,29 @@ function digCommand(msg, args, _a = true) {
     return msg.channel.send("No game running here. Learn how to start one in >help");
   }
 
+  var xMax = boardArray[guildId][channelId][255][0];
+  var yMax = boardArray[guildId][channelId][255][1];
+
+  if (coord == "remaining" || coord == "rest") {
+    for (var i = 0; i < xMax; i++) {
+      for (var j = 0; j < yMax; j++) {
+        var cell = boardArray[guildId][channelId][i][j];
+        if (cell[0] == 0 && cell[1] == 0) {
+          boardArray[guildId][channelId][i][j][0]=1;
+        }
+      }
+    }
+    detectWin(guildId, channelId);
+    displayBoard(guildId, channelId);
+    return;
+  }
+
   var newCoord;
   try {
     newCoord = cellA1ToIndex(coord);
   } catch (err) {
     throw err;
   }
-  var xMax = boardArray[guildId][channelId][255][0];
-  var yMax = boardArray[guildId][channelId][255][1];
 
   if (newCoord.row > xMax || newCoord.col > yMax) {
     throw new Error("Error: Outside board range");
@@ -273,6 +328,15 @@ function digCommand(msg, args, _a = true) {
   } else {
     floodFill(guildId, channelId, newCoord.row, newCoord.col);
   }
+
+  detectWin(guildId, channelId);
+
+  if (_a) displayBoard(guildId, channelId);
+}
+
+function detectWin(guildId, channelId) {
+  var xMax = boardArray[guildId][channelId][255][0];
+  var yMax = boardArray[guildId][channelId][255][1];
   // detecting if you won code
   var totalSquares = (xMax - 1) * (yMax - 1);
   var totalNonMines = 0;
@@ -290,8 +354,6 @@ function digCommand(msg, args, _a = true) {
   if (totalNonMines == totalUncovered) {
     return gameWin(guildId, channelId);
   }
-
-  if (_a) displayBoard(guildId, channelId);
 }
 
 function bombExplode(guildId, channelId) {
@@ -444,6 +506,7 @@ function displayBoard(guildId, channelId) {
     .channels.get(channelId)
     .send(o.join("\n"));*/
 
+  if(boardArray[guildId][channelId]===undefined)return;
   var g = [];
   for (var i = 0; i < boardArray[guildId][channelId][255][0]; i++) {
     g.push([]);
