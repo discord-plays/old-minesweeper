@@ -129,13 +129,14 @@ class MinesweeperBoard {
         });
         baseimg.composite(t.getIcon("corner"), 0, 0);
         for (var x = 0; x < this.w; x++) {
-          var a = letterVal(x);
+          var a = letterVal(x).toLowerCase();
+          var b = "a".charCodeAt(0);
           if (a.length == 1) {
             baseimg.composite(t.getIcon("letter-" + a), (1 + x) * 16, 0);
           } else if (a.length == 2) {
             baseimg.composite(t.getIcon("sidebase"), (1 + x) * 16, 0);
-            baseimg.composite(t.getMiniIcon(a.charCodeAt(0) - 65), (1 + x) * 16 + 2, 3);
-            baseimg.composite(t.getMiniIcon(a.charCodeAt(0) - 65), (1 + x) * 16 + 9, 3);
+            baseimg.composite(t.getMiniIcon(a.charCodeAt(0) - b), (1 + x) * 16 + 2, 3);
+            baseimg.composite(t.getMiniIcon(a.charCodeAt(1) - b), (1 + x) * 16 + 9, 3);
           }
         }
         for (var y = 0; y < this.h; y++) {
@@ -162,7 +163,7 @@ class MinesweeperBoard {
   }
   getMiniIcon(i) {
     var img = this.iconsimg;
-    return img.clone().crop((i % 13) * 6 + (5*16), Math.floor(i / 10) * 10 + (7*16),6,10);
+    return img.clone().crop((i % 13) * 6 + (5*16), Math.floor(i / 13) * 10 + (7*16),6,10);
   }
 }
 

@@ -16,7 +16,7 @@ client.on("ready", () => {
   console.log("done");
 });
 client.on("message", message => {
-  if (message.content.startsWith(">")) {
+  if (message.content.startsWith(">") && !message.content.startsWith("> ")) {
     processCommand(message);
   }
 });
@@ -56,7 +56,7 @@ function processCommand(receivedMessage) {
           new Discord.RichEmbed()
             .setColor("#ff0000")
             .setAuthor("Uh Oh...")
-            .setTitle(err.message.slice(8, err.message.length))
+            .setTitle(err.message.slice(7, err.message.length))
         );
       } else {
         receivedMessage.channel.send("A fault occured :sob: Please inform my developer");
