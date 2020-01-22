@@ -314,6 +314,9 @@ function digCommand(msg, args, _a = true) {
         var cell = boardArray[guildId][channelId][i][j];
         if (cell[0] == 0 && cell[1] == 0) {
           boardArray[guildId][channelId][i][j][0] = 1;
+          if (cell[2] != 0) {
+            return bombExplode(guildId, channelId);
+          }
         }
       }
     }
