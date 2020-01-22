@@ -303,7 +303,7 @@ function digCommand(msg, args, _a = true) {
       for (var j = 0; j < yMax; j++) {
         var cell = boardArray[guildId][channelId][i][j];
         if (cell[0] == 0 && cell[1] == 0) {
-          boardArray[guildId][channelId][i][j][0]=1;
+          boardArray[guildId][channelId][i][j][0] = 1;
         }
       }
     }
@@ -419,12 +419,14 @@ function floodFill(guildId, channelId, posX, posY) {
     i++;
     if (toCheck[i][0] < 0 || toCheck[i][0] >= boardArray[guildId][channelId][255][0]) continue;
     if (toCheck[i][1] < 0 || toCheck[i][1] >= boardArray[guildId][channelId][255][1]) continue;
-    if (boardArray[guildId][channelId][toCheck[i][0]][toCheck[i][1]][2] != 0) {
+    var cell = boardArray[guildId][channelId][toCheck[i][0]][toCheck[i][1]];
+    if (cell[2] == 0) {
+      boardArray[guildId][channelId][toCheck[i][0]][toCheck[i][1]][0] = 1;
+    }
+    if (cell[2] != 0) {
       return bombExplode(guildId, channelId);
     }
-    var cell = boardArray[guildId][channelId][toCheck[i][0]][toCheck[i][1]];
     if (cell[1] == 0 && cell[2] == 0 && cell[3] == 255) {
-      boardArray[guildId][channelId][toCheck[i][0]][toCheck[i][1]][0] = 1;
       // check if cell is blank
       var x = toCheck[i][0];
       var y = toCheck[i][1];
@@ -506,7 +508,7 @@ function displayBoard(guildId, channelId) {
     .channels.get(channelId)
     .send(o.join("\n"));*/
 
-  if(boardArray[guildId][channelId]===undefined)return;
+  if (boardArray[guildId][channelId] === undefined) return;
   var g = [];
   for (var i = 0; i < boardArray[guildId][channelId][255][0]; i++) {
     g.push([]);
