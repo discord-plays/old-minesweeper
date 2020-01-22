@@ -9,8 +9,8 @@ var jsonfile = require("./configs.json");
 var tokenfile = require("./token.json");
 var boardArray = []; // Guild Id, Channel Id, X, (255 is board params [xSize, ySize, sMines, dMines, tMines, aMines]) Y, [Uncovered, Flag type, Mine type, totol of surrounding mines]
 
-var maxBoardX=50;
-var maxBoardY=50;
+var maxBoardX = 50;
+var maxBoardY = 50;
 
 client.on("ready", () => {
   console.log("DPMS Bot Beta v0.9");
@@ -571,12 +571,20 @@ function displayBoard(guildId, channelId) {
             .addField(
               "Mines:",
               "Single: " +
+                flaggedMines(guildId, channelId, 1) +
+                "/" +
                 boardArray[guildId][channelId][255][2] +
                 " | Double: " +
+                flaggedMines(guildId, channelId, 2) +
+                "/" +
                 boardArray[guildId][channelId][255][3] +
                 " | Triple: " +
+                flaggedMines(guildId, channelId, 3) +
+                "/" +
                 boardArray[guildId][channelId][255][4] +
                 " | Anti: " +
+                flaggedMines(guildId, channelId, 4) +
+                "/" +
                 boardArray[guildId][channelId][255][5]
             )
             .attachFile(new Discord.Attachment(img, "minesweeperboard.png"))
@@ -585,6 +593,17 @@ function displayBoard(guildId, channelId) {
     });
   }
   // add code to make message here pls
+}
+
+function flaggedMines(guildId, channelId, mineType) {
+  var c = 0;
+  var b = boardArray[guildId][channelId];
+  for (var x = 0; x < b[255][0]; x++) {
+    for (var y = 0; y < b[255][1]; y++) {
+      if (b[x][y][1] == mineType) c++;
+    }
+  }
+  return c;
 }
 
 function calculateCurrentCellView(cell, showExploded = true) {
