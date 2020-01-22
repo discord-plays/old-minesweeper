@@ -419,12 +419,12 @@ function floodFill(guildId, channelId, posX, posY) {
     i++;
     if (toCheck[i][0] < 0 || toCheck[i][0] >= boardArray[guildId][channelId][255][0]) continue;
     if (toCheck[i][1] < 0 || toCheck[i][1] >= boardArray[guildId][channelId][255][1]) continue;
-    boardArray[guildId][channelId][toCheck[i][0]][toCheck[i][1]][0] = 1;
     if (boardArray[guildId][channelId][toCheck[i][0]][toCheck[i][1]][2] != 0) {
       return bombExplode(guildId, channelId);
     }
     var cell = boardArray[guildId][channelId][toCheck[i][0]][toCheck[i][1]];
     if (cell[1] == 0 && cell[2] == 0 && cell[3] == 255) {
+      boardArray[guildId][channelId][toCheck[i][0]][toCheck[i][1]][0] = 1;
       // check if cell is blank
       var x = toCheck[i][0];
       var y = toCheck[i][1];
