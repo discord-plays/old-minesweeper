@@ -420,7 +420,7 @@ function floodFill(guildId, channelId, posX, posY) {
     if (toCheck[i][0] < 0 || toCheck[i][0] >= boardArray[guildId][channelId][255][0]) continue;
     if (toCheck[i][1] < 0 || toCheck[i][1] >= boardArray[guildId][channelId][255][1]) continue;
     var cell = boardArray[guildId][channelId][toCheck[i][0]][toCheck[i][1]];
-    if (cell[2] == 0) {
+    if (cell[1] == 0) {
       boardArray[guildId][channelId][toCheck[i][0]][toCheck[i][1]][0] = 1;
     }
     if (cell[2] != 0) {
