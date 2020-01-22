@@ -9,6 +9,9 @@ var jsonfile = require("./configs.json");
 var tokenfile = require("./token.json");
 var boardArray = []; // Guild Id, Channel Id, X, (255 is board params [xSize, ySize, sMines, dMines, tMines, aMines]) Y, [Uncovered, Flag type, Mine type, totol of surrounding mines]
 
+var maxBoardX=50;
+var maxBoardY=50;
+
 client.on("ready", () => {
   console.log("DPMS Bot Beta v0.9");
   console.log("Initializing...");
@@ -85,7 +88,9 @@ function startCommand(msg, args) {
   [xSize, ySize, sMines, dMines, tMines, aMines] = o;
   [guildId, channelId] = [msg.guild.id, msg.channel.id];
   if (Object.keys(boardArray).includes(guildId)) {
-    if (Object.keys(boardArray[guildId]).includes(channelId)) return msg.channel.send("There is already a game running here. Try in another channel.");
+    if (Object.keys(boardArray[guildId]).includes(channelId)) {
+      return msg.channel.send("There is already a game running here. Try in another channel.");
+    }
   }
   if (!Object.keys(boardArray).includes(guildId)) {
     boardArray[guildId] = {};
@@ -98,7 +103,7 @@ function startCommand(msg, args) {
     delete boardArray[guildId][channelId];
     throw new Error("Error: Board too small!");
   }
-  if (xSize > 50 || ySize > 50) {
+  if (xSize > maxBoardX || ySize > maxBoardY) {
     delete boardArray[guildId][channelId];
     throw new Error("Error: Board too big!");
   }
@@ -282,7 +287,12 @@ function digCommand(msg, args, _a = true) {
   }
   if (args.length > 1) {
     for (var i = 0; i < args.length; i++) {
-      digCommand(msg, [args[i]], i == args.length - 1);
+      if (args[i] === null) continue;
+      var o = digCommand(msg, [args[i]], i == args.length - 1);
+      for (var j = [...[i]][0]; j < args.length; j++) {
+        var cell = cellA1ToIndex(args[j]);
+        if (o.filter(x => cell.col == o[0] && cell.row == o[1]).length >= 1) args[j] = null;
+      }
     }
     return;
   }
@@ -319,6 +329,7 @@ function digCommand(msg, args, _a = true) {
     throw err;
   }
 
+  var filledCells = [];
   if (newCoord.row > xMax || newCoord.col > yMax) {
     throw new Error("Error: Outside board range");
   } else if (boardArray[guildId][channelId][newCoord.row][newCoord.col][1] != 0) {
@@ -326,12 +337,14 @@ function digCommand(msg, args, _a = true) {
   } else if (boardArray[guildId][channelId][newCoord.row][newCoord.col][0] == 1) {
     throw new Error("Error: Square already uncovered");
   } else {
-    floodFill(guildId, channelId, newCoord.row, newCoord.col);
+    filledCells = floodFill(guildId, channelId, newCoord.row, newCoord.col);
   }
 
   detectWin(guildId, channelId);
 
   if (_a) displayBoard(guildId, channelId);
+
+  return filledCells;
 }
 
 function detectWin(guildId, channelId) {
@@ -412,7 +425,7 @@ function findMines(guildId, channelId, x, y) {
   return c;
 }
 
-function floodFill(guildId, channelId, posX, posY) {
+function floodFill(guildId, channelId, posX, posY, cells = []) {
   var toCheck = [[posX, posY]];
   var i = -1;
   while (i < toCheck.length - 1) {
@@ -421,6 +434,7 @@ function floodFill(guildId, channelId, posX, posY) {
     if (toCheck[i][1] < 0 || toCheck[i][1] >= boardArray[guildId][channelId][255][1]) continue;
     var cell = boardArray[guildId][channelId][toCheck[i][0]][toCheck[i][1]];
     if (cell[1] == 0) {
+      cells.push(toCheck[i]);
       boardArray[guildId][channelId][toCheck[i][0]][toCheck[i][1]][0] = 1;
     }
     if (cell[2] != 0) {
@@ -440,6 +454,7 @@ function floodFill(guildId, channelId, posX, posY) {
       if (!floodFillChecker(toCheck, [x + 1, y + 1])) toCheck.push([x + 1, y + 1]);
     }
   }
+  return cells;
 }
 
 function floodFillChecker(arr, pos) {

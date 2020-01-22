@@ -120,7 +120,7 @@ class MinesweeperBoard {
     var t = this;
     Jimp.read("minesweeper-icons.png").then(iconsimg => {
       t.iconsimg = iconsimg;
-      var r = new Jimp(16 * (this.w + 1), 16 * (this.h + 1), (err, baseimg) => {
+      var r = new Jimp(16 * (this.w + 2), 16 * (this.h + 2), (err, baseimg) => {
         if (err) throw err;
         this.b.forEach((row, y) => {
           row.forEach((icontype, x) => {
@@ -128,24 +128,43 @@ class MinesweeperBoard {
           });
         });
         baseimg.composite(t.getIcon("corner"), 0, 0);
+        baseimg.composite(t.getIcon("corner"), (this.w + 1) * 16, 0);
+        baseimg.composite(t.getIcon("corner"), 0, (this.h + 1) * 16);
+        baseimg.composite(t.getIcon("corner"), (this.w + 1) * 16, (this.h + 1) * 16);
         for (var x = 0; x < this.w; x++) {
           var a = letterVal(x).toLowerCase();
           var b = "a".charCodeAt(0);
           if (a.length == 1) {
+            // top letter
             baseimg.composite(t.getIcon("letter-" + a), (1 + x) * 16, 0);
+            // bottom letter
+            baseimg.composite(t.getIcon("letter-" + a), (1 + x) * 16, (this.h + 1) * 16);
           } else if (a.length == 2) {
+            // top letter
             baseimg.composite(t.getIcon("sidebase"), (1 + x) * 16, 0);
             baseimg.composite(t.getMiniIcon(a.charCodeAt(0) - b), (1 + x) * 16 + 2, 3);
             baseimg.composite(t.getMiniIcon(a.charCodeAt(1) - b), (1 + x) * 16 + 9, 3);
+            // bottom letter
+            baseimg.composite(t.getIcon("sidebase"), (1 + x) * 16, (this.h + 1) * 16);
+            baseimg.composite(t.getMiniIcon(a.charCodeAt(0) - b), (1 + x) * 16 + 2, (this.h + 1) * 16 + 3);
+            baseimg.composite(t.getMiniIcon(a.charCodeAt(1) - b), (1 + x) * 16 + 9, (this.h + 1) * 16 + 3);
           }
         }
         for (var y = 0; y < this.h; y++) {
           if (y < 9) {
-            baseimg.composite(t.getIcon("number-" + (y+1)), 0, (1 + y) * 16);
+            // left number
+            baseimg.composite(t.getIcon("number-" + (y + 1)), 0, (1 + y) * 16);
+            // right number
+            baseimg.composite(t.getIcon("number-" + (y + 1)), (this.w + 1) * 16, (1 + y) * 16);
           } else {
+            // left number
             baseimg.composite(t.getIcon("sidebase"), 0, (1 + y) * 16);
-            baseimg.composite(t.getMiniIcon((Math.floor((y+1) / 10) % 10) + 26), 2, (1 + y) * 16 + 3);
-            baseimg.composite(t.getMiniIcon(((y+1) % 10) + 26), 9, (1 + y) * 16 + 3);
+            baseimg.composite(t.getMiniIcon((Math.floor((y + 1) / 10) % 10) + 26), 2, (1 + y) * 16 + 3);
+            baseimg.composite(t.getMiniIcon(((y + 1) % 10) + 26), 9, (1 + y) * 16 + 3);
+            // right number
+            baseimg.composite(t.getIcon("sidebase"), (this.w + 1) * 16, (1 + y) * 16);
+            baseimg.composite(t.getMiniIcon((Math.floor((y + 1) / 10) % 10) + 26), (this.w + 1) * 16 + 2, (1 + y) * 16 + 3);
+            baseimg.composite(t.getMiniIcon(((y + 1) % 10) + 26), (this.w + 1) * 16 + 9, (1 + y) * 16 + 3);
           }
         }
         baseimg.resize(this.w * 64, Jimp.AUTO, Jimp.RESIZE_NEAREST_NEIGHBOR).getBuffer(Jimp.MIME_PNG, (error, result) => {
@@ -163,7 +182,7 @@ class MinesweeperBoard {
   }
   getMiniIcon(i) {
     var img = this.iconsimg;
-    return img.clone().crop((i % 13) * 6 + (5*16), Math.floor(i / 13) * 10 + (7*16),6,10);
+    return img.clone().crop((i % 13) * 6 + 5 * 16, Math.floor(i / 13) * 10 + 7 * 16, 6, 10);
   }
 }
 
