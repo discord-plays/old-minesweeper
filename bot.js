@@ -338,7 +338,8 @@ function digCommand(msg, args, _a = true) {
   } else if (boardArray[guildId][channelId][newCoord.row][newCoord.col][1] != 0) {
     throw new Error("Error: Attempted to dig flagged square");
   } else if (boardArray[guildId][channelId][newCoord.row][newCoord.col][0] == 1) {
-    throw new Error("Error: Square already uncovered");
+    //throw new Error("Error: Square already uncovered");
+    //Just skip this error for now it annoys everyone
   } else {
     filledCells = floodFill(guildId, channelId, newCoord.row, newCoord.col);
   }
