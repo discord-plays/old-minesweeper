@@ -6,7 +6,6 @@ const Discord = require("discord.js");
 const client = new Discord.Client();
 const boardhandler = require("./MinesweeperBoardRenderer.js");
 var jsonfile = require("./configs.json");
-var tokenfile = require("./token.json");
 var boardArray = []; // Guild Id, Channel Id, X, (255 is board params [xSize, ySize, sMines, dMines, tMines, aMines]) Y, [Uncovered, Flag type, Mine type, totol of surrounding mines]
 
 var maxBoardX = 50;
@@ -642,4 +641,4 @@ function calculateCurrentCellView(cell, showExploded = true) {
 }
 
 // login stuffs
-client.login(tokenfile.token);
+client.login(process.env.TOKEN);
