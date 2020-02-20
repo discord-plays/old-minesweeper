@@ -1,5 +1,7 @@
 # Discord Plays: Minesweeper
 Discord Plays: Minesweeper is a Discord bot started by @Kikithecat12345 and rewritten by @MrMelon54.
+
+Bot Invite Link: https://discordapp.com/oauth2/authorize?client_id=664934351938650144&scope=bot
 ***
 Commands:
 `>help` - Shows help screen
@@ -7,7 +9,7 @@ Commands:
 `>dig [A1] {B2} {AA5}...` - Dig those positions in the ongoing game
 `>flag [A1] {type}` - Flags position with that flag type (single is default)
 `>flag [A1] {B2} {type}` - Flags multiple positions with that flag type (single is default)
-`>flag [A1] {B2} {type} {C3} {D4} {type}` - Flags multiple positions with different flag types (last ones will default to single)
+`>flag [A1] {B2} {type} {C3} {D4} {type} {E5}` - Flags multiple positions with different flag types (last ones will default to single)
 `>board` - Displays the current state of the game in that channel
 Legend:
 `[]` - Required argument
