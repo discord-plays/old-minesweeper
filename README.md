@@ -15,7 +15,7 @@ Legend:
 
 Credits and other stuffs:
 Thanks to @MrMelon54 for making the Github and also basically rewriting all of it (he made over half of the code) and for hosting it.
-Thanks to Blananas2 for making the graphics (minesweeper-icons.png) and for bugging me to do things.
+Thanks to @Blananas2 for making the graphics (minesweeper-icons.png) and for bugging me to do things.
 Thanks to all the bug-testers on the discord (and non-bug-testers) for breaking the bot a ton.
 
 Official Discord: https://discord.gg/k4mNW7
