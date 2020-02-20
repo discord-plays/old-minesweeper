@@ -118,6 +118,10 @@ function startCommand(msg, args) {
     throw new Error("Error: Too many mines for the board!");
   }
 
+  if (totalMines < 1) {
+    throw new Error("Error: Not enough mines on the board!");
+  }
+
   boardArray[guildId][channelId][255] = [xSize, ySize, sMines, dMines, tMines, aMines];
   var xRand = 0,
     yRand = 0;
