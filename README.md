@@ -11,6 +11,7 @@ Commands:
  - `>flag [A1] {B2} {type}` - Flags multiple positions with that flag type (single is default)
  - `>flag [A1] {B2} {type} {C3} {D4} {type} {E5}` - Flags multiple positions with different flag types (last ones will default to single)
  - `>board` - Displays the current state of the game in that channel
+
 Legend:
  - `[]` - Required argument
  - `{}` - Optional argument
