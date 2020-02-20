@@ -12,10 +12,11 @@ var maxBoardX = 50;
 var maxBoardY = 50;
 
 client.on("ready", () => {
-  console.log("DPMS Bot Beta v0.9");
+  console.log("DPMS Bot v1.0");
   console.log("Initializing...");
   // init code here
   console.log("done");
+  console.log("Thanks to MrMelon54 and Blananas2");
 });
 client.on("message", message => {
   if (message.content.startsWith(">") && !message.content.startsWith("> ")) {
@@ -69,10 +70,13 @@ function processCommand(receivedMessage) {
 }
 function helpCommand(msg, args) {
   var o = [
-    "This is some unhelpful text :rofl: \n",
-    "`>start <width> <height> <mines> [double mines] [triple mines] [anti mines]` = start a game",
-    "`>flag <coords> <flag type>` = place a flag (flag type defaults to single if not specified)",
-    "`>dig <coords>` = dig"
+    "Github:\n",
+    "https://github.com/MrMelon54/discordbot-plays-minesweeper\n",
+    "`>help` - Shows this\n",
+    "`>start [width] [height] [single mines] {double mines} {triple mines} {anti-mines}` - Starts a game with those parameters\n",
+    "`>dig [A1] {B2} {AA5}...` - Dig those positions in an ongoing game\n",
+    "`>flag [A1] {B2} {type} {C3} {D4} {type} {E5}` - Flags multiple positions with different flag types (last ones will default to single)\n",
+    "`>board` - Displays the current state of the game\n",
   ];
   msg.channel.send(o.join("\n"));
   return;
