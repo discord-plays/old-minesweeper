@@ -573,11 +573,11 @@ function displayBoard(guildId, channelId) {
     client.guilds
       .get(guildId)
       .channels.get(channelId)
-      .send(generateBoardEmbed())
+      .send(generateBoardEmbed(boardArray,guildId,channelId))
       .then(m => {
         b.render(img => {
           m.edit(
-            generateBoardEmbed(boardArray)
+            generateBoardEmbed(boardArray,guildId,channelId)
               .attachFile(new Discord.Attachment(img, "minesweeperboard.png"))
               .setImage("attachment://minesweeperboard.png")
           );
@@ -587,7 +587,7 @@ function displayBoard(guildId, channelId) {
   // add code to make message here pls
 }
 
-function generateBoardEmbed(boardArray) {
+function generateBoardEmbed(boardArray,guildId,channelId) {
   return new Discord.RichEmbed()
     .setAuthor("Minesweeper!", jsonfile.logoGame)
     .setTitle("Standard (" + boardArray[guildId][channelId][255][0] + "x" + boardArray[guildId][channelId][255][1] + ")")
