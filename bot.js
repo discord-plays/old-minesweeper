@@ -557,37 +557,48 @@ function displayBoard(guildId, channelId) {
         );
     });
   } else if (exploded == true) {
-    b.render(img => {
-      client.guilds
-        .get(guildId)
-        .channels.get(channelId)
-        .send(
-          new Discord.RichEmbed()
-            .setColor("#ff0000")
-            .setAuthor("You blew up.", jsonfile.logoGame)
-            .attachFile(new Discord.Attachment(img, "minesweeperboard.png"))
-            .setImage("attachment://minesweeperboard.png")
-        );
-    });
+    client.guilds
+      .get(guildId)
+      .channels.get(channelId)
+      .send(generateBoardEmbed(boardArray, guildId, channelId))
+      .then(m => {
+        b.render(img => {
+          m.delete();
+          client.guilds
+            .get(guildId)
+            .channels.get(channelId)
+            .send(
+              new Discord.RichEmbed()
+                .setColor("#ff0000")
+                .setAuthor("You blew up.", jsonfile.logoGame)
+                .attachFile(new Discord.Attachment(img, "minesweeperboard.png"))
+                .setImage("attachment://minesweeperboard.png")
+            );
+        });
+      });
   } else {
     client.guilds
       .get(guildId)
       .channels.get(channelId)
-      .send(generateBoardEmbed(boardArray,guildId,channelId))
+      .send(generateBoardEmbed(boardArray, guildId, channelId).addField("Loading...", "(eta 3 years)"))
       .then(m => {
         b.render(img => {
-          m.edit(
-            generateBoardEmbed(boardArray,guildId,channelId)
-              .attachFile(new Discord.Attachment(img, "minesweeperboard.png"))
-              .setImage("attachment://minesweeperboard.png")
-          );
+          m.delete();
+          client.guilds
+            .get(guildId)
+            .channels.get(channelId)
+            .send(
+              generateBoardEmbed(boardArray, guildId, channelId)
+                .attachFile(new Discord.Attachment(img, "minesweeperboard.png"))
+                .setImage("attachment://minesweeperboard.png")
+            );
         });
       });
   }
   // add code to make message here pls
 }
 
-function generateBoardEmbed(boardArray,guildId,channelId) {
+function generateBoardEmbed(boardArray, guildId, channelId) {
   return new Discord.RichEmbed()
     .setAuthor("Minesweeper!", jsonfile.logoGame)
     .setTitle("Standard (" + boardArray[guildId][channelId][255][0] + "x" + boardArray[guildId][channelId][255][1] + ")")
@@ -610,7 +621,7 @@ function generateBoardEmbed(boardArray,guildId,channelId) {
         flaggedMines(guildId, channelId, 4) +
         "/" +
         boardArray[guildId][channelId][255][5]
-    ).addField("Loading... (eta 3 years)");
+    )
 }
 
 function flaggedMines(guildId, channelId, mineType) {
