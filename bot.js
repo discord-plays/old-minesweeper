@@ -69,7 +69,7 @@ function processCommand(receivedMessage) {
   }
 }
 function helpCommand(msg, args) {
-  var o = [
+  var helpText = [
     "Github:\n",
     "https://github.com/MrMelon54/discordbot-plays-minesweeper\n",
     "`>help` - Shows this\n",
@@ -78,7 +78,7 @@ function helpCommand(msg, args) {
     "`>flag [A1] {B2} {type} {C3} {D4} {type} {E5}` - Flags multiple positions with different flag types (last ones will default to single)\n",
     "`>board` - Displays the current state of the game\n",
   ];
-  msg.channel.send(o.join("\n"));
+  msg.channel.send(helpText.join("\n"));
   return;
 }
 
@@ -411,29 +411,29 @@ function findMines(guildId, channelId, x, y) {
     [x + 1, y],
     [x + 1, y + 1]
   ];
-  var c = 255;
+  var cellType = 255;
   for (var i = 0; i < toCheck.length; i++) {
     if (toCheck[i][0] < 0 || toCheck[i][1] < 0 || toCheck[i][0] >= boardArray[guildId][channelId][255][0] || toCheck[i][1] >= boardArray[guildId][channelId][255][1]) continue;
     switch (boardArray[guildId][channelId][toCheck[i][0]][toCheck[i][1]][2]) {
       case -1:
-        if (c == 255) c = 0;
-        c--;
+        if (cellType == 255) cellType = 0;
+        cellType--;
         break;
       case 1:
-        if (c == 255) c = 0;
-        c++;
+        if (cellType == 255) cellType = 0;
+        cellType++;
         break;
       case 2:
-        if (c == 255) c = 0;
-        c += 2;
+        if (cellType == 255) cellType = 0;
+        cellType += 2;
         break;
       case 3:
-        if (c == 255) c = 0;
-        c += 3;
+        if (cellType == 255) cellType = 0;
+        cellType += 3;
         break;
     }
   }
-  return c;
+  return cellType;
 }
 
 function floodFill(guildId, channelId, posX, posY, cells = []) {

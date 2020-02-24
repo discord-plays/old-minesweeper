@@ -1,5 +1,6 @@
 {
   "logoGame":"https://cdn.discordapp.com/attachments/666820187105919019/666844481215004692/da_bomb.png",
+  "logoQuestion":"",
   "status":{
     "presence":"playing",
     "activity":"minesweeper"
