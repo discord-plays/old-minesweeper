@@ -76,7 +76,7 @@ function helpCommand(msg, args) {
     "`>start [width] [height] [single mines] {double mines} {triple mines} {anti-mines}` - Starts a game with those parameters\n",
     "`>dig [A1] {B2} {AA5}...` - Dig those positions in an ongoing game\n",
     "`>flag [A1] {B2} {type} {C3} {D4} {type} {E5}` - Flags multiple positions with different flag types (last ones will default to single)\n",
-    "`>board` - Displays the current state of the game\n",
+    "`>board` - Displays the current state of the game\n"
   ];
   msg.channel.send(helpText.join("\n"));
   return;
@@ -557,53 +557,71 @@ function displayBoard(guildId, channelId) {
         );
     });
   } else if (exploded == true) {
-    b.render(img => {
-      client.guilds
-        .get(guildId)
-        .channels.get(channelId)
-        .send(
-          new Discord.RichEmbed()
-            .setColor("#ff0000")
-            .setAuthor("You blew up.", jsonfile.logoGame)
-            .attachFile(new Discord.Attachment(img, "minesweeperboard.png"))
-            .setImage("attachment://minesweeperboard.png")
-        );
-    });
+    client.guilds
+      .get(guildId)
+      .channels.get(channelId)
+      .send(generateBoardEmbed(boardArray, guildId, channelId))
+      .then(m => {
+        b.render(img => {
+          m.delete();
+          client.guilds
+            .get(guildId)
+            .channels.get(channelId)
+            .send(
+              new Discord.RichEmbed()
+                .setColor("#ff0000")
+                .setAuthor("You blew up.", jsonfile.logoGame)
+                .attachFile(new Discord.Attachment(img, "minesweeperboard.png"))
+                .setImage("attachment://minesweeperboard.png")
+            );
+        });
+      });
   } else {
-    b.render(img => {
-      client.guilds
-        .get(guildId)
-        .channels.get(channelId)
-        .send(
-          new Discord.RichEmbed()
-            .setAuthor("Minesweeper!", jsonfile.logoGame)
-            .setTitle("Standard (" + boardArray[guildId][channelId][255][0] + "x" + boardArray[guildId][channelId][255][1] + ")")
-            .setDescription(">dig [A1] to dig | >flag [A1] (S,D,T,A) to flag")
-            .addField(
-              "Mines:",
-              "Single: " +
-                flaggedMines(guildId, channelId, 1) +
-                "/" +
-                boardArray[guildId][channelId][255][2] +
-                " | Double: " +
-                flaggedMines(guildId, channelId, 2) +
-                "/" +
-                boardArray[guildId][channelId][255][3] +
-                " | Triple: " +
-                flaggedMines(guildId, channelId, 3) +
-                "/" +
-                boardArray[guildId][channelId][255][4] +
-                " | Anti: " +
-                flaggedMines(guildId, channelId, 4) +
-                "/" +
-                boardArray[guildId][channelId][255][5]
-            )
-            .attachFile(new Discord.Attachment(img, "minesweeperboard.png"))
-            .setImage("attachment://minesweeperboard.png")
-        );
-    });
+    client.guilds
+      .get(guildId)
+      .channels.get(channelId)
+      .send(generateBoardEmbed(boardArray, guildId, channelId).addField("Loading...", "(eta 3 years)"))
+      .then(m => {
+        b.render(img => {
+          m.delete();
+          client.guilds
+            .get(guildId)
+            .channels.get(channelId)
+            .send(
+              generateBoardEmbed(boardArray, guildId, channelId)
+                .attachFile(new Discord.Attachment(img, "minesweeperboard.png"))
+                .setImage("attachment://minesweeperboard.png")
+            );
+        });
+      });
   }
   // add code to make message here pls
+}
+
+function generateBoardEmbed(boardArray, guildId, channelId) {
+  return new Discord.RichEmbed()
+    .setAuthor("Minesweeper!", jsonfile.logoGame)
+    .setTitle("Standard (" + boardArray[guildId][channelId][255][0] + "x" + boardArray[guildId][channelId][255][1] + ")")
+    .setDescription(">dig [A1] to dig | >flag [A1] (S,D,T,A) to flag")
+    .addField(
+      "Mines:",
+      "Single: " +
+        flaggedMines(guildId, channelId, 1) +
+        "/" +
+        boardArray[guildId][channelId][255][2] +
+        " | Double: " +
+        flaggedMines(guildId, channelId, 2) +
+        "/" +
+        boardArray[guildId][channelId][255][3] +
+        " | Triple: " +
+        flaggedMines(guildId, channelId, 3) +
+        "/" +
+        boardArray[guildId][channelId][255][4] +
+        " | Anti: " +
+        flaggedMines(guildId, channelId, 4) +
+        "/" +
+        boardArray[guildId][channelId][255][5]
+    )
 }
 
 function flaggedMines(guildId, channelId, mineType) {
