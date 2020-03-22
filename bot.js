@@ -63,14 +63,17 @@ function processCommand(receivedMessage) {
             .setTitle(err.message.slice(7, err.message.length))
         );
       } else {
-        receivedMessage.channel.send("A fault occured :sob: Please inform my developer");
+        receivedMessage.channel.send(
+          "A fault occured :sob: Please inform my developer"
+        );
         console.error(err);
       }
     }
   }
 }
+/*
 function helpCommand(msg, args) {
-  var o = [
+  var helpText = [
     "Github:\n",
     "https://github.com/MrMelon54/discordbot-plays-minesweeper\n",
     "`>help` - Shows this\n",
@@ -79,8 +82,79 @@ function helpCommand(msg, args) {
     "`>flag [A1] {B2} {type} {C3} {D4} {type} {E5}` - Flags multiple positions with different flag types (last ones will default to single)\n",
     "`>board` - Displays the current state of the game\n"
   ];
-  msg.channel.send(o.join("\n"));
+  msg.channel.send(helpText.join("\n"));
   return;
+} */
+function helpCommand(msg, args) {
+  msg.channel.send(generateHelpText(args[0]))
+}
+
+function generateHelpText(command = null) {
+  switch (command) {
+    case "help":
+      return new Discord.RichEmbed()
+        .setColor("#15d0ed")
+        .setAuthor("Minesweeper!", jsonfile.logoQuestion)
+        .setTitle("Help: " + command)
+        .setDescription(">help (command):\nShows help for a command.")
+        .addField("Example:", "`>help dig`");
+    case "dig":
+      return new Discord.RichEmbed()
+        .setColor("#15d0ed")
+        .setAuthor("Minesweeper!", jsonfile.logoQuestion)
+        .setTitle("Help: " + command)
+        .setDescription(">dig [A1] {B2} {C3}:\nDigs coordinates.")
+        .addField("Example:", "`>dig A3 C5");
+    case "flag":
+      return new Discord.RichEmbed()
+        .setColor("#15d0ed")
+        .setAuthor("Minesweeper!", jsonfile.logoQuestion)
+        .setTitle("Help: " + command)
+        .setDescription(">flag [A1] {B2} {S|D|T|A} {C3} {D4} {S|D|T|A} {E5}:\nFlags coordinates with flags. (Default type is Single)")
+        .addField("Example:", "`>flag D4 B6 T R4 E9 D8 A B7 C3`");
+    case "start":
+      return new Discord.RichEmbed()
+        .setColor("#15d0ed")
+        .setAuthor("Minesweeper!", jsonfile.logoQuestion)
+        .setTitle("Help: " + command)
+        .setDescription(">start [width] [height] [single mines] (double mines) (triple mines) (anti-mines):\nCreates a game with the specified parameters.")
+        .addField("Example:", "`>start 8 8 10 5`");
+    case "board":
+      return new Discord.RichEmbed()
+        .setColor("#15d0ed")
+        .setAuthor("Minesweeper!", jsonfile.logoQuestion)
+        .setTitle("Help: " + command)
+        .setDescription(">board:\nShows the current game's state.")
+        .addField("Example:", "`>board`");
+    default:
+      return new Discord.RichEmbed()
+        .setColor("#15d0ed")
+        .setAuthor("Minesweeper!", jsonfile.logoQuestion)
+        .setTitle("Help")
+        .setDescription(
+          "Github: https://github.com/MrMelon54/discordbot-plays-minesweeper"
+        )
+        .addField(
+          "Help", 
+          "`>help [command]` - Shows Help"
+          )
+        .addField(
+          "Start",
+          "`>start [width] [height] [single mines] {double mines} {triple mines} {anti-mines}` - Starts a game with those parameters"
+        )
+        .addField(
+          "Dig",
+          "`>dig [A1] {B2} {AA5}...` - Dig those positions in an ongoing game"
+        )
+        .addField(
+          "Flag",
+          "`>flag [A1] {B2} {type} {C3} {D4} {type} {E5}` - Flags multiple positions with different flag types (last ones will default to single)"
+        )
+        .addField(
+        "Board", 
+        "`>board` - Displays the current state of the game"
+        );
+  }
 }
 
 function startCommand(msg, args) {
@@ -93,7 +167,9 @@ function startCommand(msg, args) {
   [guildId, channelId] = [msg.guild.id, msg.channel.id];
   if (Object.keys(boardArray).includes(guildId)) {
     if (Object.keys(boardArray[guildId]).includes(channelId)) {
-      return msg.channel.send("There is already a game running here. Try in another channel.");
+      return msg.channel.send(
+        "There is already a game running here. Try in another channel."
+      );
     }
   }
   if (!Object.keys(boardArray).includes(guildId)) {
@@ -127,7 +203,14 @@ function startCommand(msg, args) {
     throw new Error("Error: Not enough mines on the board!");
   }
 
-  boardArray[guildId][channelId][255] = [xSize, ySize, sMines, dMines, tMines, aMines];
+  boardArray[guildId][channelId][255] = [
+    xSize,
+    ySize,
+    sMines,
+    dMines,
+    tMines,
+    aMines
+  ];
   var xRand = 0,
     yRand = 0;
   var regenMine = true;
@@ -143,7 +226,9 @@ function startCommand(msg, args) {
   for (var i = 0; i < totalMines; i++) {
     xRand = Math.floor(Math.random() * xSize);
     yRand = Math.floor(Math.random() * ySize);
-    while (previousMineCoords.filter(x => x[0] == xRand && x[1] == yRand).length >= 1) {
+    while (
+      previousMineCoords.filter(x => x[0] == xRand && x[1] == yRand).length >= 1
+    ) {
       xRand = Math.floor(Math.random() * xSize);
       yRand = Math.floor(Math.random() * ySize);
     }
@@ -197,10 +282,14 @@ function boardCommand(msg, args) {
   }
   [guildId, channelId] = [msg.guild.id, msg.channel.id];
   if (!Object.keys(boardArray).includes(guildId)) {
-    return msg.channel.send("No game running here. Learn how to start one in >help");
+    return msg.channel.send(
+      "No game running here. Learn how to start one in >help"
+    );
   }
   if (!Object.keys(boardArray[guildId]).includes(channelId)) {
-    return msg.channel.send("No game running here. Learn how to start one in >help");
+    return msg.channel.send(
+      "No game running here. Learn how to start one in >help"
+    );
   }
 
   displayBoard(guildId, channelId);
@@ -212,10 +301,14 @@ function flagCommand(msg, args) {
   }
   [guildId, channelId] = [msg.guild.id, msg.channel.id];
   if (!Object.keys(boardArray).includes(guildId)) {
-    return msg.channel.send("No game running here. Learn how to start one in >help");
+    return msg.channel.send(
+      "No game running here. Learn how to start one in >help"
+    );
   }
   if (!Object.keys(boardArray[guildId]).includes(channelId)) {
-    return msg.channel.send("No game running here. Learn how to start one in >help");
+    return msg.channel.send(
+      "No game running here. Learn how to start one in >help"
+    );
   }
   var xMax = boardArray[guildId][channelId][255][0];
   var yMax = boardArray[guildId][channelId][255][1];
@@ -241,11 +334,17 @@ function flagCommand(msg, args) {
         throw new Error("Error: No board");
       } else if (newCoord.row > xMax || newCoord.col > yMax) {
         throw new Error("Error: Outside board range");
-      } else if (boardArray[guildId][channelId][newCoord.row][newCoord.col][0] == 1) {
+      } else if (
+        boardArray[guildId][channelId][newCoord.row][newCoord.col][0] == 1
+      ) {
         throw new Error("Error: Attempted to flag uncovered square");
       } else {
-        if (boardArray[guildId][channelId][newCoord.row][newCoord.col][1] == 0) {
-          boardArray[guildId][channelId][newCoord.row][newCoord.col][1] = flagInt;
+        if (
+          boardArray[guildId][channelId][newCoord.row][newCoord.col][1] == 0
+        ) {
+          boardArray[guildId][channelId][newCoord.row][
+            newCoord.col
+          ][1] = flagInt;
         } else {
           boardArray[guildId][channelId][newCoord.row][newCoord.col][1] = 0;
         }
@@ -299,7 +398,8 @@ function digCommand(msg, args, _a = true) {
       var o = digCommand(msg, [args[i]], i == args.length - 1);
       for (var j = [...[i]][0]; j < args.length; j++) {
         var cell = cellA1ToIndex(args[j]);
-        if (o.filter(x => cell.col == o[0] && cell.row == o[1]).length >= 1) args[j] = null;
+        if (o.filter(x => cell.col == o[0] && cell.row == o[1]).length >= 1)
+          args[j] = null;
       }
     }
     return;
@@ -307,10 +407,14 @@ function digCommand(msg, args, _a = true) {
   [coord] = args;
   [guildId, channelId] = [msg.guild.id, msg.channel.id];
   if (!Object.keys(boardArray).includes(guildId)) {
-    return msg.channel.send("No game running here. Learn how to start one in >help");
+    return msg.channel.send(
+      "No game running here. Learn how to start one in >help"
+    );
   }
   if (!Object.keys(boardArray[guildId]).includes(channelId)) {
-    return msg.channel.send("No game running here. Learn how to start one in >help");
+    return msg.channel.send(
+      "No game running here. Learn how to start one in >help"
+    );
   }
 
   var xMax = boardArray[guildId][channelId][255][0];
@@ -343,9 +447,13 @@ function digCommand(msg, args, _a = true) {
   var filledCells = [];
   if (newCoord.row > xMax || newCoord.col > yMax) {
     throw new Error("Error: Outside board range");
-  } else if (boardArray[guildId][channelId][newCoord.row][newCoord.col][1] != 0) {
+  } else if (
+    boardArray[guildId][channelId][newCoord.row][newCoord.col][1] != 0
+  ) {
     throw new Error("Error: Attempted to dig flagged square");
-  } else if (boardArray[guildId][channelId][newCoord.row][newCoord.col][0] == 1) {
+  } else if (
+    boardArray[guildId][channelId][newCoord.row][newCoord.col][0] == 1
+  ) {
     //throw new Error("Error: Square already uncovered");
     //Just skip this error for now it annoys everyone
   } else {
@@ -396,7 +504,12 @@ function fillNumbers(guildId, channelId) {
   var b = boardArray[guildId][channelId];
   for (var i = 0; i < b[255][0]; i++) {
     for (var j = 0; j < b[255][1]; j++) {
-      boardArray[guildId][channelId][i][j][3] = findMines(guildId, channelId, i, j);
+      boardArray[guildId][channelId][i][j][3] = findMines(
+        guildId,
+        channelId,
+        i,
+        j
+      );
     }
   }
 }
@@ -412,29 +525,35 @@ function findMines(guildId, channelId, x, y) {
     [x + 1, y],
     [x + 1, y + 1]
   ];
-  var c = 255;
+  var cellType = 255;
   for (var i = 0; i < toCheck.length; i++) {
-    if (toCheck[i][0] < 0 || toCheck[i][1] < 0 || toCheck[i][0] >= boardArray[guildId][channelId][255][0] || toCheck[i][1] >= boardArray[guildId][channelId][255][1]) continue;
+    if (
+      toCheck[i][0] < 0 ||
+      toCheck[i][1] < 0 ||
+      toCheck[i][0] >= boardArray[guildId][channelId][255][0] ||
+      toCheck[i][1] >= boardArray[guildId][channelId][255][1]
+    )
+      continue;
     switch (boardArray[guildId][channelId][toCheck[i][0]][toCheck[i][1]][2]) {
       case -1:
-        if (c == 255) c = 0;
-        c--;
+        if (cellType == 255) cellType = 0;
+        cellType--;
         break;
       case 1:
-        if (c == 255) c = 0;
-        c++;
+        if (cellType == 255) cellType = 0;
+        cellType++;
         break;
       case 2:
-        if (c == 255) c = 0;
-        c += 2;
+        if (cellType == 255) cellType = 0;
+        cellType += 2;
         break;
       case 3:
-        if (c == 255) c = 0;
-        c += 3;
+        if (cellType == 255) cellType = 0;
+        cellType += 3;
         break;
     }
   }
-  return c;
+  return cellType;
 }
 
 function floodFill(guildId, channelId, posX, posY, cells = []) {
@@ -442,8 +561,16 @@ function floodFill(guildId, channelId, posX, posY, cells = []) {
   var i = -1;
   while (i < toCheck.length - 1) {
     i++;
-    if (toCheck[i][0] < 0 || toCheck[i][0] >= boardArray[guildId][channelId][255][0]) continue;
-    if (toCheck[i][1] < 0 || toCheck[i][1] >= boardArray[guildId][channelId][255][1]) continue;
+    if (
+      toCheck[i][0] < 0 ||
+      toCheck[i][0] >= boardArray[guildId][channelId][255][0]
+    )
+      continue;
+    if (
+      toCheck[i][1] < 0 ||
+      toCheck[i][1] >= boardArray[guildId][channelId][255][1]
+    )
+      continue;
     var cell = boardArray[guildId][channelId][toCheck[i][0]][toCheck[i][1]];
     if (cell[1] == 0) {
       cells.push(toCheck[i]);
@@ -456,14 +583,18 @@ function floodFill(guildId, channelId, posX, posY, cells = []) {
       // check if cell is blank
       var x = toCheck[i][0];
       var y = toCheck[i][1];
-      if (!floodFillChecker(toCheck, [x - 1, y - 1])) toCheck.push([x - 1, y - 1]);
+      if (!floodFillChecker(toCheck, [x - 1, y - 1]))
+        toCheck.push([x - 1, y - 1]);
       if (!floodFillChecker(toCheck, [x - 1, y])) toCheck.push([x - 1, y]);
-      if (!floodFillChecker(toCheck, [x - 1, y + 1])) toCheck.push([x - 1, y + 1]);
+      if (!floodFillChecker(toCheck, [x - 1, y + 1]))
+        toCheck.push([x - 1, y + 1]);
       if (!floodFillChecker(toCheck, [x, y - 1])) toCheck.push([x, y - 1]);
       if (!floodFillChecker(toCheck, [x, y + 1])) toCheck.push([x, y + 1]);
-      if (!floodFillChecker(toCheck, [x + 1, y - 1])) toCheck.push([x + 1, y - 1]);
+      if (!floodFillChecker(toCheck, [x + 1, y - 1]))
+        toCheck.push([x + 1, y - 1]);
       if (!floodFillChecker(toCheck, [x + 1, y])) toCheck.push([x + 1, y]);
-      if (!floodFillChecker(toCheck, [x + 1, y + 1])) toCheck.push([x + 1, y + 1]);
+      if (!floodFillChecker(toCheck, [x + 1, y + 1]))
+        toCheck.push([x + 1, y + 1]);
     }
   }
   return cells;
@@ -507,7 +638,8 @@ function cellA1ToIndex(cellA1) {
 }
 
 function colA1ToIndex(colA1) {
-  if (typeof colA1 !== "string" || colA1.length > 2) throw new Error("Error: Expected column label.");
+  if (typeof colA1 !== "string" || colA1.length > 2)
+    throw new Error("Error: Expected column label.");
 
   var A = "A".charCodeAt(0);
   var number = colA1.charCodeAt(colA1.length - 1) - A;
@@ -543,7 +675,11 @@ function displayBoard(guildId, channelId) {
       g[i].push(calculateCurrentCellView(boardArray[guildId][channelId][i][j]));
     }
   }
-  var b = new boardhandler.MinesweeperBoard(g, boardArray[guildId][channelId][255][1], boardArray[guildId][channelId][255][0]);
+  var b = new boardhandler.MinesweeperBoard(
+    g,
+    boardArray[guildId][channelId][255][1],
+    boardArray[guildId][channelId][255][0]
+  );
   if (won == true) {
     b.render(img => {
       client.guilds
@@ -581,7 +717,12 @@ function displayBoard(guildId, channelId) {
     client.guilds
       .get(guildId)
       .channels.get(channelId)
-      .send(generateBoardEmbed(boardArray, guildId, channelId).addField("Loading...", "(eta 3 years)"))
+      .send(
+        generateBoardEmbed(boardArray, guildId, channelId).addField(
+          "Loading...",
+          "(eta 3 years)"
+        )
+      )
       .then(m => {
         b.render(img => {
           m.delete();
@@ -602,7 +743,13 @@ function displayBoard(guildId, channelId) {
 function generateBoardEmbed(boardArray, guildId, channelId) {
   return new Discord.RichEmbed()
     .setAuthor("Minesweeper!", jsonfile.logoGame)
-    .setTitle("Standard (" + boardArray[guildId][channelId][255][0] + "x" + boardArray[guildId][channelId][255][1] + ")")
+    .setTitle(
+      "Standard (" +
+        boardArray[guildId][channelId][255][0] +
+        "x" +
+        boardArray[guildId][channelId][255][1] +
+        ")"
+    )
     .setDescription(">dig [A1] to dig | >flag [A1] (S,D,T,A) to flag")
     .addField(
       "Mines:",
@@ -622,7 +769,7 @@ function generateBoardEmbed(boardArray, guildId, channelId) {
         flaggedMines(guildId, channelId, 4) +
         "/" +
         boardArray[guildId][channelId][255][5]
-    )
+    );
 }
 
 function flaggedMines(guildId, channelId, mineType) {
