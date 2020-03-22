@@ -1,6 +1,7 @@
 /*
   Discord Plays Minesweeper Bot
 */
+require('dotenv').config()
 const fs = require("fs");
 const Discord = require("discord.js");
 const client = new Discord.Client();
