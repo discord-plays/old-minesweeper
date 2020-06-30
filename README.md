@@ -23,6 +23,6 @@ Thanks to all the bug-testers on the discord (and non-bug-testers) for breaking 
 
 Official host warning: It is running on a Raspberry Pi with many other bots so be patient if it seems to be running slow and please email discordbots@onpointcoding.net if it goes offline.
 
-Official Discord: https://discord.gg/k4mNW7
+Official Discord: https://discord.gg/wBwKWqT
 
 Yes, you are allowed to host it yourself, or make spin-offs of it. Just don't copy it, claim it as yours, sell it, etc. **(THIS IS __NOT__ LEGAL INFO)**
