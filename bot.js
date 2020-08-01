@@ -50,6 +50,8 @@ function processCommand(receivedMessage) {
       digCommand(receivedMessage, arguments);
     } else if (primaryCommand == "board") {
       boardCommand(receivedMessage, arguments);
+    } else if (primaryCommand == "stats") {
+      statsCommand(receivedMessage, arguments);
     } else {
       receivedMessage.channel.send("Unknown command. Use >help for help.");
     }
@@ -155,6 +157,10 @@ function generateHelpText(command = null) {
         "`>board` - Displays the current state of the game"
         );
   }
+}
+
+function statsCommand(msg, args) {
+  msg.channel.send("The bot is in " + msg.client.guilds.cache.size + " guilds");
 }
 
 function startCommand(msg, args) {
