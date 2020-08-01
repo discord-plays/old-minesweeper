@@ -160,7 +160,7 @@ function generateHelpText(command = null) {
 }
 
 function statsCommand(msg, args) {
-  msg.channel.send("The bot is in " + msg.client.guilds.cache.array().length + " guilds");
+  msg.channel.send("The bot is in " + client.guilds.cache.size + " guilds");
 }
 
 function startCommand(msg, args) {
