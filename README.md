@@ -1,6 +1,8 @@
 # Discord Plays: Minesweeper
 Discord Plays: Minesweeper is a Discord bot started by @Kikithecat12345 and rewritten by @MrMelon54.
 
+This bot will be replaced by a new version once the code is complete. After that this repository will become archived.
+
 Bot Invite Link: https://discordapp.com/oauth2/authorize?client_id=664934351938650144&scope=bot
 ***
 Commands:
